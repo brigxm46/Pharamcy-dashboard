@@ -334,6 +334,7 @@ function renderTrendCharts(){
   const src=allData.filter(r=>r.name===selectedPerson);
   const role=src[0]?.role||"";
   console.log("person:", selectedPerson, "role:", role, "src:", src.length);
+  console.log("canvas:", document.getElementById("trend_1"));
   const color=R[role]?.hex||"#2E7BC4";
 
   destroyChart("trend_1");destroyChart("trend_2");
