@@ -140,7 +140,7 @@ function aggByName(rows){
 }
 
 // ── State ────────────────────────────────────────────────────────────────────
-let allData=[],dateStart="",dateEnd="",currentTab="overview",metricOv="items",metricP="items",roleP="all",selectedPerson="";
+let allData=[],dateStart="",dateEnd="",currentTab="overview",metricOv="items",metricP="items",roleP="จัดยา",selectedPerson="";
 const charts={};
 
 function getAllDates(){return[...new Set(allData.map(d=>d.date))].sort()}
@@ -156,7 +156,7 @@ function getSlicedDates(){
 function getFiltered(){
   const dates=getSlicedDates();
   let d=allData.filter(r=>dates.includes(r.date));
-  if(currentTab==="person"&&roleP!=="all")d=d.filter(r=>r.role===roleP);
+  if(currentTab==="person")d=d.filter(r=>r.role===roleP);
   return d;
 }
 function getMetric(){return currentTab==="overview"?metricOv:metricP}
@@ -367,7 +367,7 @@ function renderPersonHTML(filtered,metric,sliced){
   const byName=aggByName(filtered).sort((a,b)=>b[metric]-a[metric]);
   const sel=`<div class="filter-bar">
     <label>Role:</label>
-    <select id="roleP"><option value="all">ทุก Role</option>${ROLES.map(r=>`<option value="${r}"${roleP===r?" selected":""}>${R[r].label}</option>`).join("")}</select>
+    <select id="roleP">${ROLES.map(r=>`<option value="${r}"${roleP===r?" selected":""}>${R[r].label}</option>`).join("")}</select>
     <label>แสดง:</label>
     <select id="metricP"><option value="items"${metric==="items"?" selected":""}>รายการยา</option><option value="rx"${metric==="rx"?" selected":""}>ใบสั่งยา</option></select>
   </div>`;
