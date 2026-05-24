@@ -335,6 +335,7 @@ function renderTrendCharts(){
   const role=src[0]?.role||"";
   console.log("person:", selectedPerson, "role:", role, "src:", src.length);
   console.log("canvas:", document.getElementById("trend_1"));
+  console.log("role check:", role==="เช็คยา", role==="จ่ายยา", role==="precheckin");
   const color=R[role]?.hex||"#2E7BC4";
 
   destroyChart("trend_1");destroyChart("trend_2");
