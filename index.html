@@ -332,7 +332,7 @@ function renderTrendCharts(){
   if(sliced.length<2||!selectedPerson)return;
   const labels=sliced.map(d=>d.slice(5));
   const src=allData.filter(r=>r.name===selectedPerson);
-  const role=src[0]?.role||"";
+  const roleCounts={};src.forEach(r=>{roleCounts[r.role]=(roleCounts[r.role]||0)+1;});const role=Object.entries(roleCounts).sort((a,b)=>b[1]-a[1])[0]?.[0]||"";
   console.log("person:", selectedPerson, "role:", role, "src:", src.length);
   console.log("canvas:", document.getElementById("trend_1"));
   console.log("role check:", role==="เช็คยา", role==="จ่ายยา", role==="precheckin");
