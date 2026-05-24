@@ -194,7 +194,7 @@ document.getElementById("app").addEventListener("change",async e=>{
   if(e.target.id==="metricOv"){metricOv=e.target.value;render();}
   if(e.target.id==="metricP"){metricP=e.target.value;render();}
   if(e.target.id==="roleP"){roleP=e.target.value;render();}
-  if(e.target.id==="personSel"){selectedPerson=e.target.value;renderTrendCharts();}
+  if(e.target.id==="personSel"){selectedPerson=e.target.value;setTimeout(renderTrendCharts,50);}
 });
 document.getElementById("app").addEventListener("click",e=>{
   if(e.target.id==="btnLoadGH")loadFromGitHub();
@@ -273,7 +273,7 @@ function render(){
   ${allData.length>0&&currentTab==="person"?renderPersonHTML(filtered,metric,sliced):""}
   `;
 
-  if(allData.length>0&&currentTab==="trend")renderTrendCharts();
+  if(allData.length>0&&currentTab==="trend")setTimeout(renderTrendCharts,50);
 }
 
 function renderOverview(filtered,metric){
