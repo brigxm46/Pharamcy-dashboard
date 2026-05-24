@@ -285,8 +285,7 @@ function render(){
 
   <div class="tab-row">
     <button class="tab${currentTab==="overview"?" on":""}" data-tab="overview">ภาพรวม</button>
-    <button class="tab${currentTab==="trend"?" on":""}" data-tab="trend">แนวโน้มรายวัน</button>
-    <button class="tab${currentTab==="person"?" on":""}" data-tab="person">รายบุคคล</button>
+       <button class="tab${currentTab==="person"?" on":""}" data-tab="person">รายบุคคล</button>
   </div>
 
   ${allData.length===0?`<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">ยังไม่มีข้อมูล</div><div>กด <b>โหลดจาก GitHub</b> เพื่อดึงข้อมูลล่าสุด<br>หรืออัปโหลด Excel โดยตรง</div></div>`:""}
