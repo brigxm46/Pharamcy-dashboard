@@ -230,8 +230,7 @@ function render(){
   const infoText=!slicerStart?"คลิกเลือกวันเริ่มต้น":!slicerEnd?`เริ่ม ${slicerStart.slice(5)} — คลิกเลือกวันสิ้นสุด`:`${slicerStart.slice(5)} – ${slicerEnd.slice(5)}`;
   const chipStatus=d=>{if(!slicerStart)return"";if(!slicerEnd)return d===slicerStart?"edge":"";if(d===slicerStart||d===slicerEnd)return"edge";if(d>slicerStart&&d<slicerEnd)return"inrange";return""};
 
-  // destroy trend charts on re-render
-  ["trend_1","trend_2"].forEach(destroyChart);
+  ["tc_pc","tc_jd","tc_jd_err","tc_ck","tc_ds"].forEach(destroyChart);
 
   document.getElementById("app").innerHTML=`
   <div class="topbar">
@@ -294,37 +293,35 @@ function renderOverview(filtered,metric){
 function renderTrendSection(){
   const sliced=getSlicedDates();
   if(sliced.length<2)return`<div class="no-data">ต้องการข้อมูลอย่างน้อย 2 วันขึ้นไป</div>`;
-
-  // รายชื่อทุกคน เรียงตาม role แล้วชื่อ
   const allNames=[...new Set(allData.map(r=>r.name))].sort();
   if(!selectedPerson||!allNames.includes(selectedPerson))selectedPerson=allNames[0]||"";
-
-  const personRole=allData.find(r=>r.name===selectedPerson)?.role||"";
-  const rc=R[personRole]||{hex:"#888",label:""};
-
-  const charts2=personRole==="จัดยา"
-    ?`<div class="card">
-        <div class="role-header"><span class="role-dot" style="background:${rc.hex}"></span><span class="role-title">รายการยา (รายวัน)</span></div>
-        <div style="position:relative;width:100%;height:220px"><canvas id="trend_1"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="role-header"><span class="role-dot" style="background:#C0392B"></span><span class="role-title">รายการจัดผิด (รายวัน)</span></div>
-        <div style="position:relative;width:100%;height:180px"><canvas id="trend_2"></canvas></div>
-      </div>`
-    :`<div class="card">
-        <div class="role-header"><span class="role-dot" style="background:${rc.hex}"></span><span class="role-title">${personRole==="precheckin"?"ใบสั่งยา":personRole==="เช็คยา"||personRole==="จ่ายยา"?"ใบสั่งยา & รายการยา":""} (รายวัน)</span></div>
-        <div style="position:relative;width:100%;height:220px"><canvas id="trend_1"></canvas></div>
-      </div>`;
-
   return`
     <div class="person-select-bar">
       <label>เลือกเจ้าหน้าที่:</label>
       <select id="personSel" style="min-width:220px">
         ${allNames.map(n=>`<option value="${n}"${n===selectedPerson?" selected":""}>${n}</option>`).join("")}
       </select>
-      ${personRole?`<span class="role-pill" style="background:${R[personRole]?.fill||'#eee'};color:${R[personRole]?.text||'#333'}">${rc.label}</span>`:""}
     </div>
-    ${charts2}`;
+    <div class="card">
+      <div class="role-header"><span class="role-dot" style="background:${R.precheckin.hex}"></span><span class="role-title">Precheckin — ใบสั่งยา (รายวัน)</span></div>
+      <div style="position:relative;width:100%;height:200px"><canvas id="tc_pc"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="role-header"><span class="role-dot" style="background:${R.จัดยา.hex}"></span><span class="role-title">จัดยา — รายการยา (รายวัน)</span></div>
+      <div style="position:relative;width:100%;height:200px"><canvas id="tc_jd"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="role-header"><span class="role-dot" style="background:#C0392B"></span><span class="role-title">จัดยา — รายการจัดผิด (รายวัน)</span></div>
+      <div style="position:relative;width:100%;height:180px"><canvas id="tc_jd_err"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="role-header"><span class="role-dot" style="background:${R.เช็คยา.hex}"></span><span class="role-title">เช็คยา — ใบสั่งยา & รายการยา (รายวัน)</span></div>
+      <div style="position:relative;width:100%;height:200px"><canvas id="tc_ck"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="role-header"><span class="role-dot" style="background:${R.จ่ายยา.hex}"></span><span class="role-title">จ่ายยา — ใบสั่งยา & รายการยา (รายวัน)</span></div>
+      <div style="position:relative;width:100%;height:200px"><canvas id="tc_ds"></canvas></div>
+    </div>`;
 }
 
 function renderTrendCharts(){
@@ -332,40 +329,36 @@ function renderTrendCharts(){
   if(sliced.length<2||!selectedPerson)return;
   const labels=sliced.map(d=>d.slice(5));
   const src=allData.filter(r=>r.name===selectedPerson);
-  const roleCounts={};src.forEach(r=>{roleCounts[r.role]=(roleCounts[r.role]||0)+1;});const role=Object.entries(roleCounts).sort((a,b)=>b[1]-a[1])[0]?.[0]||"";
-  console.log("person:", selectedPerson, "role:", role, "src:", src.length);
-  console.log("canvas:", document.getElementById("trend_1"));
-  console.log("role check:", role==="เช็คยา", role==="จ่ายยา", role==="precheckin");
-  const color=R[role]?.hex||"#2E7BC4";
+  const byRole=role=>src.filter(r=>r.role===role);
 
-  ["trend_1","trend_2"].forEach(id=>{if(charts[id]){charts[id].destroy();delete charts[id];}const c=document.getElementById(id);if(c){const p=c.parentNode;p.removeChild(c);const n=document.createElement("canvas");n.id=id;n.style.position="absolute";n.style.top="0";n.style.left="0";n.style.width="100%";n.style.height="100%";p.appendChild(n);}});
+  ["tc_pc","tc_jd","tc_jd_err","tc_ck","tc_ds"].forEach(destroyChart);
 
-  if(role==="จัดยา"){
-    // กราฟรายการยา
-    makeLineChart("trend_1",labels,[{
-      label:"รายการยา",
-      data:sliced.map(d=>src.filter(r=>r.date===d).reduce((s,r)=>s+r.items,0)),
-      borderColor:color,backgroundColor:color+"22",fill:true,tension:.3,pointRadius:4,borderWidth:2
-    }]);
-    // กราฟจัดผิด
-    makeLineChart("trend_2",labels,[{
-      label:"รายการจัดผิด",
-      data:sliced.map(d=>src.filter(r=>r.date===d).reduce((s,r)=>s+r.errors,0)),
-      borderColor:"#C0392B",backgroundColor:"#C0392B22",fill:true,tension:.3,pointRadius:4,borderWidth:2
-    }]);
-  } else if(role==="precheckin"){
-    makeLineChart("trend_1",labels,[{
-      label:"ใบสั่งยา",
-      data:sliced.map(d=>src.filter(r=>r.date===d).reduce((s,r)=>s+r.rx,0)),
-      borderColor:color,backgroundColor:color+"22",fill:true,tension:.3,pointRadius:4,borderWidth:2
-    }]);
-  } else {
-    // เช็คยา, จ่ายยา — ทั้ง rx และ items
-    makeLineChart("trend_1",labels,[
-      {label:"ใบสั่งยา",data:sliced.map(d=>src.filter(r=>r.date===d).reduce((s,r)=>s+r.rx,0)),borderColor:color,backgroundColor:"transparent",tension:.3,pointRadius:4,borderWidth:2},
-      {label:"รายการยา",data:sliced.map(d=>src.filter(r=>r.date===d).reduce((s,r)=>s+r.items,0)),borderColor:color,backgroundColor:"transparent",tension:.3,pointRadius:3,borderWidth:1.5,borderDash:[5,3]}
-    ]);
-  }
+  // Precheckin — ใบสั่งยา
+  makeLineChart("tc_pc",labels,[{label:"ใบสั่งยา",
+    data:sliced.map(d=>byRole("precheckin").filter(r=>r.date===d).reduce((s,r)=>s+r.rx,0)),
+    borderColor:R.precheckin.hex,backgroundColor:R.precheckin.hex+"22",fill:true,tension:.3,pointRadius:4,borderWidth:2}]);
+
+  // จัดยา — รายการยา
+  makeLineChart("tc_jd",labels,[{label:"รายการยา",
+    data:sliced.map(d=>byRole("จัดยา").filter(r=>r.date===d).reduce((s,r)=>s+r.items,0)),
+    borderColor:R.จัดยา.hex,backgroundColor:R.จัดยา.hex+"22",fill:true,tension:.3,pointRadius:4,borderWidth:2}]);
+
+  // จัดยา — จัดผิด
+  makeLineChart("tc_jd_err",labels,[{label:"จัดผิด",
+    data:sliced.map(d=>byRole("จัดยา").filter(r=>r.date===d).reduce((s,r)=>s+r.errors,0)),
+    borderColor:"#C0392B",backgroundColor:"#C0392B22",fill:true,tension:.3,pointRadius:4,borderWidth:2}]);
+
+  // เช็คยา — rx + items
+  makeLineChart("tc_ck",labels,[
+    {label:"ใบสั่งยา",data:sliced.map(d=>byRole("เช็คยา").filter(r=>r.date===d).reduce((s,r)=>s+r.rx,0)),borderColor:R.เช็คยา.hex,backgroundColor:"transparent",tension:.3,pointRadius:4,borderWidth:2},
+    {label:"รายการยา",data:sliced.map(d=>byRole("เช็คยา").filter(r=>r.date===d).reduce((s,r)=>s+r.items,0)),borderColor:R.เช็คยา.hex,backgroundColor:"transparent",tension:.3,pointRadius:3,borderWidth:1.5,borderDash:[5,3]}
+  ]);
+
+  // จ่ายยา — rx + items
+  makeLineChart("tc_ds",labels,[
+    {label:"ใบสั่งยา",data:sliced.map(d=>byRole("จ่ายยา").filter(r=>r.date===d).reduce((s,r)=>s+r.rx,0)),borderColor:R.จ่ายยา.hex,backgroundColor:"transparent",tension:.3,pointRadius:4,borderWidth:2},
+    {label:"รายการยา",data:sliced.map(d=>byRole("จ่ายยา").filter(r=>r.date===d).reduce((s,r)=>s+r.items,0)),borderColor:R.จ่ายยา.hex,backgroundColor:"transparent",tension:.3,pointRadius:3,borderWidth:1.5,borderDash:[5,3]}
+  ]);
 }
 
 function renderPersonHTML(filtered,metric,sliced){
