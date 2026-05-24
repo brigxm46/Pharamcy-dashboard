@@ -338,7 +338,7 @@ function renderTrendCharts(){
   console.log("role check:", role==="เช็คยา", role==="จ่ายยา", role==="precheckin");
   const color=R[role]?.hex||"#2E7BC4";
 
-  destroyChart("trend_1");destroyChart("trend_2");
+  ["trend_1","trend_2"].forEach(id=>{if(charts[id]){charts[id].destroy();delete charts[id];}const c=document.getElementById(id);if(c){const p=c.parentNode;p.removeChild(c);const n=document.createElement("canvas");n.id=id;n.style.position="absolute";n.style.top="0";n.style.left="0";n.style.width="100%";n.style.height="100%";p.appendChild(n);}});
 
   if(role==="จัดยา"){
     // กราฟรายการยา
