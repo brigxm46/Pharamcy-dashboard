@@ -333,6 +333,7 @@ function renderTrendCharts(){
   const labels=sliced.map(d=>d.slice(5));
   const src=allData.filter(r=>r.name===selectedPerson);
   const role=src[0]?.role||"";
+  console.log("person:", selectedPerson, "role:", role, "src:", src.length);
   const color=R[role]?.hex||"#2E7BC4";
 
   destroyChart("trend_1");destroyChart("trend_2");
