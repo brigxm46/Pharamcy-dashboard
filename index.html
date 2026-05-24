@@ -16,35 +16,40 @@
     .datelabel{font-size:12px;color:#aaa;margin-top:2px}
     .load-btn{border:0.5px solid #2E7BC4;border-radius:10px;padding:8px 16px;cursor:pointer;display:flex;align-items:center;gap:8px;background:#fff;font-size:13px;color:#2E7BC4;font-weight:600;transition:background .15s}
     .load-btn:hover{background:#DDEEFF}
-    .upload-label{border:0.5px dashed #ccc;border-radius:10px;padding:8px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;background:#fafafa;font-size:13px;color:#555;transition:background .15s}
-    .upload-label:hover{background:#f0f1f5}
-    .btn-row{display:flex;gap:8px;flex-wrap:wrap}
-    .slicer{background:#f7f8fa;border:0.5px solid #e8e8ec;border-radius:12px;padding:10px 14px;margin-bottom:1rem;display:flex;align-items:center;flex-wrap:wrap;gap:10px}
-    .slicer-label{font-size:12px;color:#888;font-weight:600;white-space:nowrap}
-    .chips{display:flex;flex-wrap:wrap;gap:5px;flex:1}
-    .chip{padding:4px 11px;border-radius:99px;font-size:12px;cursor:pointer;border:0.5px solid #d0d0d8;background:#fff;color:#555;transition:all .12s}
-    .chip.edge{border:2px solid #2E7BC4;color:#2E7BC4;font-weight:700}
-    .chip.inrange{background:#ddeeff;border-color:#2E7BC4;color:#1A4F82}
-    .slicer-info{font-size:11px;color:#888;white-space:nowrap}
-    .reset-btn{font-size:12px;color:#888;padding:4px 8px;border-radius:8px;border:0.5px solid #d0d0d8;background:transparent;cursor:pointer}
+    /* Date range picker */
+    .date-filter{background:#fff;border:0.5px solid #e8e8ec;border-radius:12px;padding:10px 16px;margin-bottom:1rem;display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+    .date-filter label{font-size:12px;color:#888;white-space:nowrap}
+    .date-filter input[type=date]{font-size:13px;padding:5px 10px;border-radius:8px;border:0.5px solid #d0d0d8;background:#fff;color:#1a1a2e;font-family:'Sarabun',sans-serif}
+    .date-filter input[type=date]:focus{outline:none;border-color:#2E7BC4}
+    .date-sep{font-size:13px;color:#aaa}
+    .shortcut-btns{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+    .sc-btn{font-size:11px;padding:4px 10px;border-radius:99px;border:0.5px solid #d0d0d8;background:#fff;color:#555;cursor:pointer;transition:all .12s}
+    .sc-btn:hover{background:#DDEEFF;border-color:#2E7BC4;color:#2E7BC4}
+    .sc-btn.on{background:#2E7BC4;border-color:#2E7BC4;color:#fff}
+    .date-info{font-size:11px;color:#aaa}
+    /* KPI */
     .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:1.25rem}
     .kpi{background:#f7f8fa;border-radius:10px;padding:12px 16px}
     .kpi-lbl{font-size:11px;color:#888;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
     .kpi-val{font-size:22px;font-weight:700;color:#1a1a2e;line-height:1}
     .kpi-sub{font-size:11px;color:#aaa;margin-top:3px}
     .kpi-val.danger{color:#C0392B}
+    /* Tabs */
     .tab-row{border-bottom:0.5px solid #e8e8ec;display:flex;margin-bottom:16px}
     .tab{padding:7px 18px;font-size:13px;border:none;background:none;cursor:pointer;color:#999;border-bottom:2px solid transparent;font-weight:400;margin-bottom:-1px}
     .tab.on{color:#1a1a2e;border-bottom-color:#1a1a2e;font-weight:600}
+    /* Cards */
     .card{background:#fff;border:0.5px solid #e8e8ec;border-radius:12px;padding:1rem 1.25rem;margin-bottom:12px}
     .role-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
     .role-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;display:inline-block}
     .role-title{font-size:13px;font-weight:600}
+    /* Bar chart */
     .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
     .bar-name{width:130px;font-size:12px;color:#444;text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .bar-bg{flex:1;height:22px;background:#f0f1f5;border-radius:4px;overflow:hidden}
     .bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;transition:width .3s}
     .bar-num{font-size:11px;color:#fff;font-weight:600;white-space:nowrap}
+    /* Person */
     .role-pill{padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600}
     .person-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
     .person-card{background:#fff;border:0.5px solid #e8e8ec;border-radius:12px;padding:1rem 1.25rem}
@@ -59,6 +64,10 @@
     .stat-box.err .stat-val{color:#C0392B}
     .delta-up{font-size:11px;color:#4A8C2A;margin-left:4px}
     .delta-down{font-size:11px;color:#C0392B;margin-left:4px}
+    /* Person select */
+    .person-select-bar{background:#fff;border:0.5px solid #e8e8ec;border-radius:12px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .person-select-bar label{font-size:13px;color:#555;font-weight:600}
+    /* Misc */
     .empty-state{text-align:center;padding:4rem 2rem;color:#aaa}
     .empty-icon{font-size:40px;margin-bottom:12px}
     .empty-title{font-size:15px;font-weight:600;color:#999;margin-bottom:6px}
@@ -70,9 +79,6 @@
     .progress{font-size:12px;color:#aaa;margin-top:6px}
     .toast{position:fixed;bottom:20px;right:20px;background:#1a1a2e;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
     .toast.show{opacity:1}
-    .person-select-bar{background:#fff;border:0.5px solid #e8e8ec;border-radius:12px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-    .person-select-bar label{font-size:13px;color:#555;font-weight:600}
-    .person-info{font-size:12px;color:#aaa;margin-left:auto}
   </style>
 </head>
 <body>
@@ -90,7 +96,6 @@ const R={
   จ่ายยา:{hex:"#C0392B",fill:"#FDDEDD",text:"#7B1F1A",label:"จ่ายยา"},
 };
 const ROLES=["precheckin","จัดยา","เช็คยา","จ่ายยา"];
-const PC=["#2E7BC4","#B07010","#534AB7","#0F6E56","#C0392B","#2D6A8E","#4A8C2A","#8E5A2D"];
 
 const shortName=n=>n.replace(/^(นางสาว|นาย|นาง)/,"").split(" ")[0];
 const initials=n=>n.replace(/^(นางสาว|นาย|นาง)/,"").slice(0,2);
@@ -135,15 +140,18 @@ function aggByName(rows){
 }
 
 // ── State ────────────────────────────────────────────────────────────────────
-let allData=[],slicerStart=null,slicerEnd=null,currentTab="overview",metricOv="items",metricP="items",roleP="all",selectedPerson="";
+let allData=[],dateStart="",dateEnd="",currentTab="overview",metricOv="items",metricP="items",roleP="all",selectedPerson="";
 const charts={};
 
 function getAllDates(){return[...new Set(allData.map(d=>d.date))].sort()}
 function getSlicedDates(){
   const all=getAllDates();
-  if(!slicerStart)return all;
-  if(!slicerEnd)return all.filter(d=>d===slicerStart);
-  return all.filter(d=>d>=slicerStart&&d<=slicerEnd);
+  if(!dateStart&&!dateEnd)return all;
+  return all.filter(d=>{
+    if(dateStart&&d<dateStart)return false;
+    if(dateEnd&&d>dateEnd)return false;
+    return true;
+  });
 }
 function getFiltered(){
   const dates=getSlicedDates();
@@ -153,7 +161,26 @@ function getFiltered(){
 }
 function getMetric(){return currentTab==="overview"?metricOv:metricP}
 
-// ── Load from GitHub ─────────────────────────────────────────────────────────
+// ── Shortcuts ─────────────────────────────────────────────────────────────────
+function applyShortcut(type){
+  const all=getAllDates();
+  if(!all.length)return;
+  const last=all[all.length-1];
+  const d=new Date(last);
+  if(type==="all"){dateStart="";dateEnd="";}
+  else if(type==="7"){
+    const from=new Date(d);from.setDate(from.getDate()-6);
+    dateStart=from.toISOString().slice(0,10);dateEnd=last;
+  }else if(type==="30"){
+    const from=new Date(d);from.setDate(from.getDate()-29);
+    dateStart=from.toISOString().slice(0,10);dateEnd=last;
+  }else if(type==="month"){
+    dateStart=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-01`;dateEnd=last;
+  }
+  render();
+}
+
+// ── Load from GitHub ──────────────────────────────────────────────────────────
 async function loadFromGitHub(){
   document.getElementById("app").innerHTML=`<div class="loading">⏳ กำลังโหลดข้อมูลจาก GitHub...<div class="progress" id="prog"></div></div>`;
   try{
@@ -167,10 +194,9 @@ async function loadFromGitHub(){
       document.getElementById("prog").textContent=`โหลด ${++loaded}/${xlsxFiles.length}: ${file.name}`;
       const date=dateFromFilename(file.name);if(!date)continue;
       const r=await fetch(file.download_url);
-      const buf=await r.arrayBuffer();
-      allData.push(...await parseXlsx(new Uint8Array(buf),date));
+      allData.push(...await parseXlsx(new Uint8Array(await r.arrayBuffer()),date));
     }
-    slicerStart=null;slicerEnd=null;selectedPerson="";
+    dateStart="";dateEnd="";selectedPerson="";
     showToast(`✓ โหลดสำเร็จ ${xlsxFiles.length} ไฟล์`);render();
   }catch(e){
     document.getElementById("app").innerHTML=`<div class="loading">❌ โหลดไม่สำเร็จ: ${e.message}<br><br><button onclick="render()" style="padding:8px 16px;border-radius:8px;border:1px solid #ccc;cursor:pointer">กลับหน้าหลัก</button></div>`;
@@ -178,19 +204,9 @@ async function loadFromGitHub(){
 }
 
 // ── Events ────────────────────────────────────────────────────────────────────
-document.getElementById("app").addEventListener("change",async e=>{
-  if(e.target.id==="fileInput"){
-    for(const file of e.target.files){
-      const date=dateFromFilename(file.name)||prompt(`ไม่พบวันที่ใน "${file.name}"\nพิมพ์วันที่ (YYYY-MM-DD):`);
-      if(!date)continue;
-      const buf=await file.arrayBuffer();
-      const parsed=await parseXlsx(new Uint8Array(buf),date);
-      if(!parsed.length)continue;
-      allData=allData.filter(d=>d.date!==date);
-      allData.push(...parsed);
-    }
-    slicerStart=null;slicerEnd=null;showToast("✓ อัปโหลดสำเร็จ");render();
-  }
+document.getElementById("app").addEventListener("change",e=>{
+  if(e.target.id==="dateFrom"){dateStart=e.target.value;render();}
+  if(e.target.id==="dateTo"){dateEnd=e.target.value;render();}
   if(e.target.id==="metricOv"){metricOv=e.target.value;render();}
   if(e.target.id==="metricP"){metricP=e.target.value;render();}
   if(e.target.id==="roleP"){roleP=e.target.value;render();}
@@ -198,13 +214,7 @@ document.getElementById("app").addEventListener("change",async e=>{
 });
 document.getElementById("app").addEventListener("click",e=>{
   if(e.target.id==="btnLoadGH")loadFromGitHub();
-  if(e.target.classList.contains("chip")){
-    const date=e.target.dataset.date;
-    if(!slicerStart||slicerEnd){slicerStart=date;slicerEnd=null;}
-    else{if(date<slicerStart){slicerEnd=slicerStart;slicerStart=date;}else slicerEnd=date;}
-    render();
-  }
-  if(e.target.id==="resetSlicer"){slicerStart=null;slicerEnd=null;render();}
+  if(e.target.dataset.sc)applyShortcut(e.target.dataset.sc);
   if(e.target.classList.contains("tab")){currentTab=e.target.dataset.tab;render();}
 });
 
@@ -219,16 +229,19 @@ function makeLineChart(id,labels,datasets){
 // ── Render ────────────────────────────────────────────────────────────────────
 function render(){
   const filtered=getFiltered();
-  const dates=getAllDates();
+  const all=getAllDates();
   const sliced=getSlicedDates();
   const metric=getMetric();
   const totalItems=filtered.reduce((s,r)=>s+r.items,0);
   const totalRx=filtered.reduce((s,r)=>s+r.rx,0);
   const totalErr=filtered.reduce((s,r)=>s+r.errors,0);
   const names=[...new Set(filtered.map(r=>r.name))].length;
-  const dateRangeLabel=dates.length===0?"ยังไม่มีข้อมูล":dates.length===1?dates[0]:`${dates[0]} ถึง ${dates[dates.length-1]} (${dates.length} วัน)`;
-  const infoText=!slicerStart?"คลิกเลือกวันเริ่มต้น":!slicerEnd?`เริ่ม ${slicerStart.slice(5)} — คลิกเลือกวันสิ้นสุด`:`${slicerStart.slice(5)} – ${slicerEnd.slice(5)}`;
-  const chipStatus=d=>{if(!slicerStart)return"";if(!slicerEnd)return d===slicerStart?"edge":"";if(d===slicerStart||d===slicerEnd)return"edge";if(d>slicerStart&&d<slicerEnd)return"inrange";return""};
+  const dateRangeLabel=all.length===0?"ยังไม่มีข้อมูล":all.length===1?all[0]:`${all[0]} ถึง ${all[all.length-1]} (${all.length} วัน)`;
+
+  // shortcut active state
+  const scAll=!dateStart&&!dateEnd;
+  const sc7=sliced.length<=7&&!scAll;
+  const sc30=sliced.length<=30&&sliced.length>7&&!scAll;
 
   ["tc_pc","tc_jd","tc_jd_err","tc_ck","tc_ds"].forEach(destroyChart);
 
@@ -239,17 +252,23 @@ function render(){
       <div class="subtitle">เฉพาะในเวลาทำการ</div>
       <div class="datelabel">${dateRangeLabel}</div>
     </div>
-    <div class="btn-row">
-      <button class="load-btn" id="btnLoadGH">🔄 โหลดจาก GitHub</button>
-      <label class="upload-label">📂 อัปโหลด Excel<input type="file" id="fileInput" accept=".xlsx,.xls" multiple style="display:none"></label>
-    </div>
+    <button class="load-btn" id="btnLoadGH">🔄 โหลดจาก GitHub</button>
   </div>
 
-  ${dates.length>0?`<div class="slicer">
-    <span class="slicer-label">ช่วงวันที่</span>
-    <div class="chips">${dates.map(d=>`<button class="chip ${chipStatus(d)}" data-date="${d}">${d.slice(5)}</button>`).join("")}</div>
-    <span class="slicer-info">${infoText}</span>
-    <button class="reset-btn" id="resetSlicer">รีเซ็ต</button>
+  ${all.length>0?`
+  <div class="date-filter">
+    <label>วันเริ่มต้น</label>
+    <input type="date" id="dateFrom" value="${dateStart}" min="${all[0]||""}" max="${all[all.length-1]||""}">
+    <span class="date-sep">—</span>
+    <label>วันสิ้นสุด</label>
+    <input type="date" id="dateTo" value="${dateEnd}" min="${all[0]||""}" max="${all[all.length-1]||""}">
+    <div class="shortcut-btns">
+      <button class="sc-btn${scAll?" on":""}" data-sc="all">ทั้งหมด</button>
+      <button class="sc-btn${sc7?" on":""}" data-sc="7">7 วัน</button>
+      <button class="sc-btn${sc30?" on":""}" data-sc="30">30 วัน</button>
+      <button class="sc-btn" data-sc="month">เดือนนี้</button>
+    </div>
+    <span class="date-info">${sliced.length} วัน</span>
   </div>`:""}
 
   <div class="kpi-row">
@@ -266,7 +285,7 @@ function render(){
     <button class="tab${currentTab==="person"?" on":""}" data-tab="person">รายบุคคล</button>
   </div>
 
-  ${allData.length===0?`<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">ยังไม่มีข้อมูล</div><div>กด <b>โหลดจาก GitHub</b> เพื่อดึงข้อมูลล่าสุด<br>หรืออัปโหลด Excel โดยตรง</div></div>`:""}
+  ${allData.length===0?`<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">ยังไม่มีข้อมูล</div><div>กด <b>โหลดจาก GitHub</b> เพื่อดึงข้อมูลล่าสุด</div></div>`:""}
   ${allData.length>0&&currentTab==="overview"?renderOverview(filtered,metric):""}
   ${allData.length>0&&currentTab==="trend"?renderTrendSection():""}
   ${allData.length>0&&currentTab==="person"?renderPersonHTML(filtered,metric,sliced):""}
@@ -330,31 +349,14 @@ function renderTrendCharts(){
   const labels=sliced.map(d=>d.slice(5));
   const src=allData.filter(r=>r.name===selectedPerson);
   const byRole=role=>src.filter(r=>r.role===role);
-
   ["tc_pc","tc_jd","tc_jd_err","tc_ck","tc_ds"].forEach(destroyChart);
-
-  // Precheckin — ใบสั่งยา
-  makeLineChart("tc_pc",labels,[{label:"ใบสั่งยา",
-    data:sliced.map(d=>byRole("precheckin").filter(r=>r.date===d).reduce((s,r)=>s+r.rx,0)),
-    borderColor:R.precheckin.hex,backgroundColor:R.precheckin.hex+"22",fill:true,tension:.3,pointRadius:4,borderWidth:2}]);
-
-  // จัดยา — รายการยา
-  makeLineChart("tc_jd",labels,[{label:"รายการยา",
-    data:sliced.map(d=>byRole("จัดยา").filter(r=>r.date===d).reduce((s,r)=>s+r.items,0)),
-    borderColor:R.จัดยา.hex,backgroundColor:R.จัดยา.hex+"22",fill:true,tension:.3,pointRadius:4,borderWidth:2}]);
-
-  // จัดยา — จัดผิด
-  makeLineChart("tc_jd_err",labels,[{label:"จัดผิด",
-    data:sliced.map(d=>byRole("จัดยา").filter(r=>r.date===d).reduce((s,r)=>s+r.errors,0)),
-    borderColor:"#C0392B",backgroundColor:"#C0392B22",fill:true,tension:.3,pointRadius:4,borderWidth:2}]);
-
-  // เช็คยา — rx + items
+  makeLineChart("tc_pc",labels,[{label:"ใบสั่งยา",data:sliced.map(d=>byRole("precheckin").filter(r=>r.date===d).reduce((s,r)=>s+r.rx,0)),borderColor:R.precheckin.hex,backgroundColor:R.precheckin.hex+"22",fill:true,tension:.3,pointRadius:4,borderWidth:2}]);
+  makeLineChart("tc_jd",labels,[{label:"รายการยา",data:sliced.map(d=>byRole("จัดยา").filter(r=>r.date===d).reduce((s,r)=>s+r.items,0)),borderColor:R.จัดยา.hex,backgroundColor:R.จัดยา.hex+"22",fill:true,tension:.3,pointRadius:4,borderWidth:2}]);
+  makeLineChart("tc_jd_err",labels,[{label:"จัดผิด",data:sliced.map(d=>byRole("จัดยา").filter(r=>r.date===d).reduce((s,r)=>s+r.errors,0)),borderColor:"#C0392B",backgroundColor:"#C0392B22",fill:true,tension:.3,pointRadius:4,borderWidth:2}]);
   makeLineChart("tc_ck",labels,[
     {label:"ใบสั่งยา",data:sliced.map(d=>byRole("เช็คยา").filter(r=>r.date===d).reduce((s,r)=>s+r.rx,0)),borderColor:R.เช็คยา.hex,backgroundColor:"transparent",tension:.3,pointRadius:4,borderWidth:2},
     {label:"รายการยา",data:sliced.map(d=>byRole("เช็คยา").filter(r=>r.date===d).reduce((s,r)=>s+r.items,0)),borderColor:R.เช็คยา.hex,backgroundColor:"transparent",tension:.3,pointRadius:3,borderWidth:1.5,borderDash:[5,3]}
   ]);
-
-  // จ่ายยา — rx + items
   makeLineChart("tc_ds",labels,[
     {label:"ใบสั่งยา",data:sliced.map(d=>byRole("จ่ายยา").filter(r=>r.date===d).reduce((s,r)=>s+r.rx,0)),borderColor:R.จ่ายยา.hex,backgroundColor:"transparent",tension:.3,pointRadius:4,borderWidth:2},
     {label:"รายการยา",data:sliced.map(d=>byRole("จ่ายยา").filter(r=>r.date===d).reduce((s,r)=>s+r.items,0)),borderColor:R.จ่ายยา.hex,backgroundColor:"transparent",tension:.3,pointRadius:3,borderWidth:1.5,borderDash:[5,3]}
