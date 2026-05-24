@@ -4,574 +4,350 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Workload Dashboard ห้องยาลีลาวดี</title>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Sarabun', sans-serif; background: #F5F6FA; min-height: 100vh; }
-    #root { max-width: 860px; margin: 0 auto; padding: 1.25rem 1rem; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Sarabun',sans-serif;background:#F5F6FA;min-height:100vh;color:#1a1a2e}
+    #app{max-width:880px;margin:0 auto;padding:1.25rem 1rem}
+    .topbar{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:1rem}
+    h1{font-size:18px;font-weight:700}
+    .subtitle{font-size:12px;color:#B07010;font-weight:600;margin-top:2px}
+    .datelabel{font-size:12px;color:#aaa;margin-top:2px}
+    .upload-label{border:0.5px dashed #ccc;border-radius:10px;padding:8px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;background:#fafafa;font-size:13px;color:#555;transition:background .15s}
+    .upload-label:hover{background:#f0f1f5}
+    .slicer{background:#f7f8fa;border:0.5px solid #e8e8ec;border-radius:12px;padding:10px 14px;margin-bottom:1rem;display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+    .slicer-label{font-size:12px;color:#888;font-weight:600;white-space:nowrap}
+    .chips{display:flex;flex-wrap:wrap;gap:5px;flex:1}
+    .chip{padding:4px 11px;border-radius:99px;font-size:12px;cursor:pointer;border:0.5px solid #d0d0d8;background:#fff;color:#555;transition:all .12s}
+    .chip.edge{border:2px solid #2E7BC4;color:#2E7BC4;font-weight:700}
+    .chip.inrange{background:#ddeeff;border-color:#2E7BC4;color:#1A4F82}
+    .slicer-info{font-size:11px;color:#888;white-space:nowrap}
+    .reset-btn{font-size:12px;color:#888;padding:4px 8px;border-radius:8px;border:0.5px solid #d0d0d8;background:transparent;cursor:pointer}
+    .reset-btn:hover{background:#f0f1f5}
+    .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:1.25rem}
+    .kpi{background:#f7f8fa;border-radius:10px;padding:12px 16px}
+    .kpi-lbl{font-size:11px;color:#888;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+    .kpi-val{font-size:22px;font-weight:700;color:#1a1a2e;line-height:1}
+    .kpi-sub{font-size:11px;color:#aaa;margin-top:3px}
+    .kpi-val.danger{color:#C0392B}
+    .tab-row{border-bottom:0.5px solid #e8e8ec;display:flex;margin-bottom:16px}
+    .tab{padding:7px 18px;font-size:13px;border:none;background:none;cursor:pointer;color:#999;border-bottom:2px solid transparent;font-weight:400;margin-bottom:-1px}
+    .tab.on{color:#1a1a2e;border-bottom-color:#1a1a2e;font-weight:600}
+    .card{background:#fff;border:0.5px solid #e8e8ec;border-radius:12px;padding:1rem 1.25rem;margin-bottom:12px}
+    .role-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+    .role-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;display:inline-block}
+    .role-title{font-size:13px;font-weight:600}
+    .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+    .bar-name{width:130px;font-size:12px;color:#444;text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .bar-bg{flex:1;height:22px;background:#f0f1f5;border-radius:4px;overflow:hidden}
+    .bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;transition:width .3s}
+    .bar-num{font-size:11px;color:#fff;font-weight:600;white-space:nowrap}
+    .role-pill{padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600}
+    .person-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+    .person-card{background:#fff;border:0.5px solid #e8e8ec;border-radius:12px;padding:1rem 1.25rem}
+    .person-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+    .avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+    .stat-row{display:flex;gap:8px;flex-wrap:wrap}
+    .stat-box{flex:1;min-width:70px;background:#f7f8fa;border-radius:8px;padding:8px}
+    .stat-lbl{font-size:10px;color:#aaa}
+    .stat-val{font-size:18px;font-weight:700;color:#1a1a2e}
+    .stat-box.err{background:#fff0f0}
+    .stat-box.err .stat-lbl{color:#C0392B}
+    .stat-box.err .stat-val{color:#C0392B}
+    .delta-up{font-size:11px;color:#4A8C2A;margin-left:4px}
+    .delta-down{font-size:11px;color:#C0392B;margin-left:4px}
+    .trend-legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+    .legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#666}
+    .legend-line{width:20px;height:3px;border-radius:2px;display:inline-block}
+    .empty-state{text-align:center;padding:4rem 2rem;color:#aaa}
+    .empty-icon{font-size:40px;margin-bottom:12px}
+    .empty-title{font-size:15px;font-weight:600;color:#999;margin-bottom:6px}
+    select{font-size:13px;padding:5px 10px;border-radius:8px;border:0.5px solid #d0d0d8;background:#fff;color:#1a1a2e}
+    .filter-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+    .filter-bar label{font-size:12px;color:#888}
+    canvas{display:block}
+    .no-data{text-align:center;padding:2rem;color:#aaa;font-size:13px}
   </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="text/babel">
-    const { useState, useRef, useCallback } = React;
-    const { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } = Recharts;
+<div id="app"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+// ── Config ─────────────────────────────────────────────────────────────────
 const R = {
-  precheckin: { hex: "#2E7BC4", fill: "#DDEEFF", text: "#1A4F82", label: "Precheckin" },
-  จัดยา:     { hex: "#4A8C2A", fill: "#DFF0D1", text: "#2C5518", label: "จัดยา" },
-  เช็คยา:    { hex: "#B07010", fill: "#FEF0CC", text: "#7A4E08", label: "เช็คยา" },
-  จ่ายยา:    { hex: "#C0392B", fill: "#FDDEDD", text: "#7B1F1A", label: "จ่ายยา" },
+  precheckin:{hex:"#2E7BC4",fill:"#DDEEFF",text:"#1A4F82",label:"Precheckin"},
+  จัดยา:{hex:"#4A8C2A",fill:"#DFF0D1",text:"#2C5518",label:"จัดยา"},
+  เช็คยา:{hex:"#B07010",fill:"#FEF0CC",text:"#7A4E08",label:"เช็คยา"},
+  จ่ายยา:{hex:"#C0392B",fill:"#FDDEDD",text:"#7B1F1A",label:"จ่ายยา"},
 };
-const PERSON_COLORS = [
-  "#2E7BC4","#B07010","#6B4FBB","#1A7A5E",
-  "#C0392B","#2D6A8E","#4A8C2A","#8E5A2D",
-];
-const ROLES = ["precheckin","จัดยา","เช็คยา","จ่ายยา"];
+const ROLES=["precheckin","จัดยา","เช็คยา","จ่ายยา"];
+const PC=["#2E7BC4","#B07010","#534AB7","#0F6E56","#C0392B","#2D6A8E","#4A8C2A","#8E5A2D"];
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-const shortName = n => n.replace(/^(นางสาว|นาย|นาง)/, "").split(" ")[0];
-const initials   = n => n.replace(/^(นางสาว|นาย|นาง)/, "").slice(0, 2);
-const toN        = v => { const n = Number(v); return isNaN(n) ? 0 : n; };
+// ── Helpers ────────────────────────────────────────────────────────────────
+const shortName=n=>n.replace(/^(นางสาว|นาย|นาง)/,"").split(" ")[0];
+const initials=n=>n.replace(/^(นางสาว|นาย|นาง)/,"").slice(0,2);
+const toN=v=>{const x=Number(v);return isNaN(x)?0:x};
 
-function dateFromFilename(name) {
-  const m = name.match(/(\d{4}-\d{2}-\d{2})/);
-  if (m) return m[1];
-  const m2 = name.match(/(\d{2})[_\-](\d{2})[_\-](\d{4})/);
-  if (m2) return `${m2[3]}-${m2[2]}-${m2[1]}`;
+function dateFromFilename(name){
+  const m=name.match(/(\d{4}-\d{2}-\d{2})/);if(m)return m[1];
+  const m2=name.match(/(\d{2})[_\-](\d{2})[_\-](\d{4})/);if(m2)return`${m2[3]}-${m2[2]}-${m2[1]}`;
   return null;
 }
-
-function parseRows(rows, date) {
-  let subRow = -1;
-  for (let i = 0; i < Math.min(10, rows.length); i++) {
-    if (rows[i]?.some?.(c => c && String(c).includes("ชื่อ"))) { subRow = i + 1; break; }
-  }
-  if (subRow < 0) return [];
-  const out = [];
-  for (let i = subRow + 1; i < rows.length; i++) {
-    const r = rows[i]; if (!r || !r[1]) continue;
-    const name = String(r[1]);
+function parseRows(rows,date){
+  let sub=-1;
+  for(let i=0;i<Math.min(10,rows.length);i++){if(rows[i]?.some?.(c=>c&&String(c).includes("ชื่อ"))){sub=i+1;break}}
+  if(sub<0)return[];
+  const out=[];
+  for(let i=sub+1;i<rows.length;i++){
+    const r=rows[i];if(!r||!r[1])continue;
+    const name=String(r[1]).trim();if(!name||name==="None")continue;
     const prx=toN(r[4]),pitems=toN(r[5]),jitems=toN(r[6]),jerr=toN(r[7]);
     const crx=toN(r[8]),citems=toN(r[9]),drx=toN(r[10]),ditems=toN(r[11]);
-    if (prx||pitems) out.push({date,name,role:"precheckin",rx:prx,items:pitems,errors:0});
-    if (jitems)      out.push({date,name,role:"จัดยา",rx:0,items:jitems,errors:jerr});
-    if (crx||citems) out.push({date,name,role:"เช็คยา",rx:crx,items:citems,errors:0});
-    if (drx||ditems) out.push({date,name,role:"จ่ายยา",rx:drx,items:ditems,errors:0});
+    if(prx||pitems)out.push({date,name,role:"precheckin",rx:prx,items:pitems,errors:0});
+    if(jitems)out.push({date,name,role:"จัดยา",rx:0,items:jitems,errors:jerr});
+    if(crx||citems)out.push({date,name,role:"เช็คยา",rx:crx,items:citems,errors:0});
+    if(drx||ditems)out.push({date,name,role:"จ่ายยา",rx:drx,items:ditems,errors:0});
   }
   return out;
 }
-
-function aggByName(rows) {
-  const map = {};
-  rows.forEach(r => {
-    if (!map[r.name]) map[r.name] = { name:r.name, role:r.role, rx:0, items:0, errors:0 };
-    map[r.name].rx += r.rx; map[r.name].items += r.items; map[r.name].errors += r.errors;
-  });
-  return Object.values(map);
+function aggByName(rows){
+  const m={};
+  rows.forEach(r=>{if(!m[r.name])m[r.name]={name:r.name,role:r.role,rx:0,items:0,errors:0};m[r.name].rx+=r.rx;m[r.name].items+=r.items;m[r.name].errors+=r.errors;});
+  return Object.values(m);
+}
+function rankNames(src){
+  return[...new Set(src.map(r=>r.name))].map(n=>({n,t:src.filter(r=>r.name===n).reduce((s,r)=>s+r.items+r.rx,0)})).sort((a,b)=>b.t-a.t).map(x=>x.n);
 }
 
-function rankNames(src) {
-  return [...new Set(src.map(r => r.name))]
-    .map(n => ({ n, total: src.filter(r => r.name===n).reduce((s,r)=>s+r.items+r.rx,0) }))
-    .sort((a,b) => b.total-a.total).map(x => x.n);
+// ── State ──────────────────────────────────────────────────────────────────
+let allData=[], slicerStart=null, slicerEnd=null, currentTab="overview", metricOv="items", metricP="items", roleP="all";
+const charts={};
+
+function getAllDates(){return[...new Set(allData.map(d=>d.date))].sort()}
+function getSlicedDates(){
+  const all=getAllDates();
+  if(!slicerStart)return all;
+  if(!slicerEnd)return all.filter(d=>d===slicerStart);
+  return all.filter(d=>d>=slicerStart&&d<=slicerEnd);
+}
+function getFiltered(){
+  const dates=getSlicedDates();
+  let d=allData.filter(r=>dates.includes(r.date));
+  if(currentTab==="person"&&roleP!=="all")d=d.filter(r=>r.role===roleP);
+  return d;
+}
+function getMetric(){return currentTab==="overview"?metricOv:metricP}
+
+// ── File Upload ─────────────────────────────────────────────────────────────
+document.getElementById("app").addEventListener("change",async e=>{
+  if(e.target.id!=="fileInput")return;
+  for(const file of e.target.files){
+    const date=dateFromFilename(file.name)||prompt(`ไม่พบวันที่ในชื่อไฟล์ "${file.name}"\nพิมพ์วันที่ (YYYY-MM-DD):`);
+    if(!date)continue;
+    const buf=await file.arrayBuffer();
+    const wb=XLSX.read(buf,{type:"array"});
+    const ws=wb.Sheets[wb.SheetNames[0]];
+    const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
+    const parsed=parseRows(rows,date);
+    if(!parsed.length)continue;
+    allData=allData.filter(d=>d.date!==date);
+    allData.push(...parsed);
+  }
+  slicerStart=null;slicerEnd=null;
+  render();
+});
+
+// ── Slicer ─────────────────────────────────────────────────────────────────
+document.getElementById("app").addEventListener("click",e=>{
+  if(e.target.classList.contains("chip")){
+    const date=e.target.dataset.date;
+    if(!slicerStart||slicerEnd){slicerStart=date;slicerEnd=null;}
+    else{if(date<slicerStart){slicerEnd=slicerStart;slicerStart=date;}else slicerEnd=date;}
+    render();
+  }
+  if(e.target.id==="resetSlicer"){slicerStart=null;slicerEnd=null;render();}
+  if(e.target.classList.contains("tab")){currentTab=e.target.dataset.tab;render();}
+});
+document.getElementById("app").addEventListener("change",e=>{
+  if(e.target.id==="metricOv"){metricOv=e.target.value;render();}
+  if(e.target.id==="metricP"){metricP=e.target.value;render();}
+  if(e.target.id==="roleP"){roleP=e.target.value;render();}
+});
+
+// ── Chart helpers ───────────────────────────────────────────────────────────
+function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+function makeLineChart(id,labels,datasets,opts={}){
+  destroyChart(id);
+  const ctx=document.getElementById(id);if(!ctx)return;
+  charts[id]=new Chart(ctx,{type:"line",data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:11}}},y:{ticks:{font:{size:11}},beginAtZero:true}},...opts}});
 }
 
-// ─── Custom Tooltip ───────────────────────────────────────────────────────────
-const CustomTooltip = ({ active, payload, label }) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div style={{ background:"#fff", border:"0.5px solid #d0d0d0", borderRadius:8, padding:"8px 12px", fontSize:12, boxShadow:"0 2px 8px rgba(0,0,0,0.08)" }}>
-      <div style={{ fontWeight:600, marginBottom:4, color:"#333" }}>{label}</div>
-      {payload.map((p,i) => (
-        <div key={i} style={{ color:p.color||p.stroke, display:"flex", gap:8, justifyContent:"space-between" }}>
-          <span>{p.name}</span><span style={{ fontWeight:600 }}>{p.value?.toLocaleString()}</span>
-        </div>
-      ))}
+// ── Render ──────────────────────────────────────────────────────────────────
+function render(){
+  const filtered=getFiltered();
+  const dates=getAllDates();
+  const sliced=getSlicedDates();
+  const metric=getMetric();
+
+  const totalItems=filtered.reduce((s,r)=>s+r.items,0);
+  const totalRx=filtered.reduce((s,r)=>s+r.rx,0);
+  const totalErr=filtered.reduce((s,r)=>s+r.errors,0);
+  const names=[...new Set(filtered.map(r=>r.name))].length;
+
+  const dateRangeLabel=dates.length===0?"ยังไม่มีข้อมูล — อัปโหลดไฟล์ Excel เพื่อเริ่มใช้งาน":dates.length===1?dates[0]:`${dates[0]} ถึง ${dates[dates.length-1]} (${dates.length} วัน)`;
+  const infoText=!slicerStart?"คลิกเลือกวันเริ่มต้น":!slicerEnd?`เริ่ม ${slicerStart.slice(5)} — คลิกเลือกวันสิ้นสุด`:`${slicerStart.slice(5)} – ${slicerEnd.slice(5)}`;
+
+  const chipStatus=d=>{if(!slicerStart)return"";if(!slicerEnd)return d===slicerStart?"edge":"";if(d===slicerStart||d===slicerEnd)return"edge";if(d>slicerStart&&d<slicerEnd)return"inrange";return""};
+
+  // destroy all trend charts before re-render
+  ["trend_pc","trend_ck","trend_ds","trend_jd_items","trend_jd_err"].forEach(destroyChart);
+
+  document.getElementById("app").innerHTML=`
+  <div class="topbar">
+    <div>
+      <h1>Workload Dashboard ห้องยาลีลาวดี</h1>
+      <div class="subtitle">เฉพาะในเวลาทำการ</div>
+      <div class="datelabel">${dateRangeLabel}</div>
     </div>
-  );
-};
-
-// ─── Role Pill ────────────────────────────────────────────────────────────────
-const RolePill = ({ role }) => {
-  const rc = R[role] || { fill:"#eee", text:"#666", label: role };
-  return <span style={{ padding:"2px 8px", borderRadius:99, fontSize:11, fontWeight:600, background:rc.fill, color:rc.text }}>{rc.label}</span>;
-};
-
-// ─── KPI Card ─────────────────────────────────────────────────────────────────
-const KPICard = ({ label, value, sub, danger }) => (
-  <div style={{ background:"#F7F8FA", borderRadius:10, padding:"12px 16px", flex:1, minWidth:100 }}>
-    <div style={{ fontSize:11, color:"#888", marginBottom:4, textTransform:"uppercase", letterSpacing:"0.05em" }}>{label}</div>
-    <div style={{ fontSize:22, fontWeight:700, color: danger ? "#C0392B" : "#1a1a2e", lineHeight:1 }}>{value}</div>
-    {sub && <div style={{ fontSize:11, color:"#aaa", marginTop:3 }}>{sub}</div>}
+    <label class="upload-label">
+      📂 <span>อัปโหลด Excel (หลายไฟล์ได้)</span>
+      <input type="file" id="fileInput" accept=".xlsx,.xls" multiple style="display:none">
+    </label>
   </div>
-);
 
-// ─── Section Card ─────────────────────────────────────────────────────────────
-const SectionCard = ({ title, roleKey, children }) => {
-  const rc = roleKey ? R[roleKey] : null;
-  return (
-    <div style={{ background:"#fff", border:"0.5px solid #E8E8EC", borderRadius:12, padding:"1rem 1.25rem", marginBottom:14 }}>
-      {title && (
-        <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:12 }}>
-          {rc && <span style={{ width:10, height:10, borderRadius:"50%", background:rc.hex, flexShrink:0, display:"inline-block" }} />}
-          <span style={{ fontSize:13, fontWeight:600, color:"#1a1a2e" }}>{title}</span>
-        </div>
-      )}
-      {children}
-    </div>
-  );
-};
+  ${dates.length>0?`
+  <div class="slicer">
+    <span class="slicer-label">ช่วงวันที่</span>
+    <div class="chips">${dates.map(d=>`<button class="chip ${chipStatus(d)}" data-date="${d}">${d.slice(5)}</button>`).join("")}</div>
+    <span class="slicer-info">${infoText}</span>
+    <button class="reset-btn" id="resetSlicer">รีเซ็ต</button>
+  </div>`:""}
 
-// ─── Date Slicer ─────────────────────────────────────────────────────────────
-function DateSlicer({ dates, slicerStart, slicerEnd, onChipClick, onReset }) {
-  const getStatus = d => {
-    if (!slicerStart) return "idle";
-    if (!slicerEnd) return d === slicerStart ? "edge" : "idle";
-    if (d === slicerStart || d === slicerEnd) return "edge";
-    if (d > slicerStart && d < slicerEnd) return "in";
-    return "idle";
-  };
-  const infoText = !slicerStart ? "คลิกเลือกวันเริ่มต้น"
-    : !slicerEnd ? `เริ่ม ${slicerStart.slice(5)} — คลิกเลือกวันสิ้นสุด`
-    : `${slicerStart.slice(5)} – ${slicerEnd.slice(5)}`;
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-lbl">บุคลากร</div><div class="kpi-val">${names}</div><div class="kpi-sub">คน</div></div>
+    <div class="kpi"><div class="kpi-lbl">จำนวนวัน</div><div class="kpi-val">${sliced.length||"—"}</div><div class="kpi-sub">วัน</div></div>
+    <div class="kpi"><div class="kpi-lbl">รายการยารวม</div><div class="kpi-val">${totalItems.toLocaleString()}</div><div class="kpi-sub">รายการ</div></div>
+    <div class="kpi"><div class="kpi-lbl">ใบสั่งยารวม</div><div class="kpi-val">${totalRx.toLocaleString()}</div><div class="kpi-sub">ใบ</div></div>
+    <div class="kpi"><div class="kpi-lbl">จัดผิด</div><div class="kpi-val${totalErr>0?" danger":""}">${totalErr}</div><div class="kpi-sub">รายการ</div></div>
+  </div>
 
-  return (
-    <div style={{ background:"#F7F8FA", border:"0.5px solid #E8E8EC", borderRadius:12, padding:"10px 14px", marginBottom:14, display:"flex", alignItems:"center", flexWrap:"wrap", gap:10 }}>
-      <span style={{ fontSize:12, color:"#888", whiteSpace:"nowrap", fontWeight:600 }}>ช่วงวันที่</span>
-      <div style={{ display:"flex", flexWrap:"wrap", gap:5, flex:1 }}>
-        {dates.map(d => {
-          const s = getStatus(d);
-          return (
-            <button key={d} onClick={() => onChipClick(d)} style={{
-              padding:"4px 11px", borderRadius:99, fontSize:12, cursor:"pointer",
-              border: s==="edge" ? "2px solid #2E7BC4" : "0.5px solid #D0D0D8",
-              background: s==="edge" ? "#fff" : s==="in" ? "#DDEEFF" : "#fff",
-              color: s==="edge" ? "#2E7BC4" : s==="in" ? "#1A4F82" : "#555",
-              fontWeight: s==="edge" ? 700 : 400,
-              transition:"all .12s",
-            }}>{d.slice(5)}</button>
-          );
-        })}
-      </div>
-      <span style={{ fontSize:11, color:"#888", whiteSpace:"nowrap" }}>{infoText}</span>
-      <button onClick={onReset} style={{ fontSize:12, color:"#888", padding:"4px 10px", borderRadius:8, border:"0.5px solid #D0D0D8", background:"transparent", cursor:"pointer" }}>รีเซ็ต</button>
-    </div>
-  );
+  <div class="tab-row">
+    <button class="tab${currentTab==="overview"?" on":""}" data-tab="overview">ภาพรวม</button>
+    <button class="tab${currentTab==="trend"?" on":""}" data-tab="trend">แนวโน้มรายวัน</button>
+    <button class="tab${currentTab==="person"?" on":""}" data-tab="person">รายบุคคล</button>
+  </div>
+
+  ${allData.length===0?`<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">ยังไม่มีข้อมูล</div><div>อัปโหลดไฟล์ Excel รายวันเพื่อเริ่มใช้งาน</div></div>`:""}
+
+  ${allData.length>0&&currentTab==="overview"?renderOverview(filtered,metric):""}
+  ${allData.length>0&&currentTab==="trend"?renderTrendHTML(sliced):""}
+  ${allData.length>0&&currentTab==="person"?renderPersonHTML(filtered,metric,sliced):""}
+  `;
+
+  // draw charts after DOM update
+  if(allData.length>0&&currentTab==="trend") drawTrendCharts(sliced);
 }
 
-// ─── Overview Tab ─────────────────────────────────────────────────────────────
-function OverviewTab({ filtered, metric, onMetricChange }) {
-  return (
-    <div>
-      <div style={{ display:"flex", gap:8, alignItems:"center", marginBottom:14 }}>
-        <span style={{ fontSize:12, color:"#888" }}>แสดง:</span>
-        <select value={metric} onChange={e => onMetricChange(e.target.value)}
-          style={{ fontSize:13, padding:"5px 10px", borderRadius:8, border:"0.5px solid #D0D0D8", background:"#fff", color:"#1a1a2e" }}>
-          <option value="items">รายการยา</option>
-          <option value="rx">ใบสั่งยา</option>
-        </select>
-      </div>
-      {ROLES.filter(role => filtered.some(r => r.role===role)).map(role => {
-        const byName = aggByName(filtered.filter(r => r.role===role)).sort((a,b) => b[metric]-a[metric]);
-        const max = Math.max(...byName.map(d=>d[metric]), 1);
-        return (
-          <SectionCard key={role} title={`${R[role].label} — ${byName.length} คน`} roleKey={role}>
-            <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
-              {byName.map(p => (
-                <div key={p.name} style={{ display:"flex", alignItems:"center", gap:10 }}>
-                  <div style={{ width:110, fontSize:12, color:"#444", textAlign:"right", flexShrink:0, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{shortName(p.name)}</div>
-                  <div style={{ flex:1, height:22, background:"#F0F1F5", borderRadius:4, overflow:"hidden" }}>
-                    <div style={{ height:"100%", width:`${Math.round((p[metric]/max)*100)}%`, background:R[role].hex, borderRadius:4, display:"flex", alignItems:"center", justifyContent:"flex-end", paddingRight:6, transition:"width .3s" }}>
-                      <span style={{ fontSize:11, color:"#fff", fontWeight:600, whiteSpace:"nowrap" }}>{p[metric].toLocaleString()}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </SectionCard>
-        );
-      })}
-    </div>
-  );
+function renderOverview(filtered,metric){
+  const sel=`<div class="filter-bar"><label>แสดง:</label><select id="metricOv"><option value="items"${metric==="items"?" selected":""}>รายการยา</option><option value="rx"${metric==="rx"?" selected":""}>ใบสั่งยา</option></select></div>`;
+  const cards=ROLES.filter(role=>filtered.some(r=>r.role===role)).map(role=>{
+    const byName=aggByName(filtered.filter(r=>r.role===role)).sort((a,b)=>b[metric]-a[metric]);
+    const max=Math.max(...byName.map(d=>d[metric]),1);
+    const rc=R[role];
+    const bars=byName.map(p=>{
+      const pct=Math.round((p[metric]/max)*100);
+      return`<div class="bar-row"><div class="bar-name">${shortName(p.name)}</div><div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${rc.hex}"><span class="bar-num">${p[metric].toLocaleString()}</span></div></div></div>`;
+    }).join("");
+    return`<div class="card"><div class="role-header"><span class="role-dot" style="background:${rc.hex}"></span><span class="role-title">${rc.label} — ${byName.length} คน</span></div>${bars}</div>`;
+  }).join("");
+  return sel+cards;
 }
 
-// ─── Trend Tab ────────────────────────────────────────────────────────────────
-function TrendTab({ slicedDates, allData }) {
-  if (slicedDates.length < 2) return (
-    <div style={{ textAlign:"center", padding:"3rem", color:"#aaa", fontSize:14 }}>ต้องการข้อมูลอย่างน้อย 2 วันขึ้นไปเพื่อแสดงแนวโน้ม</div>
-  );
-  const labels = slicedDates.map(d => d.slice(5));
+function renderTrendHTML(sliced){
+  if(sliced.length<2)return`<div class="no-data">ต้องการข้อมูลอย่างน้อย 2 วันขึ้นไป</div>`;
+  const sections=[
+    {key:"trend_pc",role:"precheckin",title:"Precheckin — ใบสั่งยารายวัน"},
+    {key:"trend_ck",role:"เช็คยา",title:"เช็คยา — ใบสั่งยา & รายการยา รายวัน",dual:true},
+    {key:"trend_ds",role:"จ่ายยา",title:"จ่ายยา — ใบสั่งยา & รายการยา รายวัน",dual:true},
+    {key:"trend_jd_items",role:"จัดยา",title:"จัดยา — รายการยารายวัน"},
+    {key:"trend_jd_err",role:"จัดยา",title:"จัดยา — รายการจัดผิดรายวัน",errChart:true},
+  ];
+  return sections.filter(s=>allData.some(r=>r.role===s.role)).map(s=>{
+    const src=allData.filter(r=>r.role===s.role);
+    const names=rankNames(src);
+    const legendHTML=names.map((n,i)=>`<span class="legend-item"><span class="legend-line" style="background:${PC[i%PC.length]}"></span>${shortName(n)}</span>`).join("");
+    const dualNote=s.dual?`<div style="display:flex;gap:12px;margin-bottom:6px"><span class="legend-item"><span class="legend-line" style="background:#888"></span>เส้นทึบ = ใบสั่งยา</span><span class="legend-item"><span class="legend-line" style="background:#888;opacity:.5"></span>เส้นประ = รายการยา</span></div>`:"";
+    const dot=s.errChart?"#C0392B":R[s.role].hex;
+    return`<div class="card">
+      <div class="role-header"><span class="role-dot" style="background:${dot}"></span><span class="role-title">${s.title}</span></div>
+      <div class="trend-legend">${legendHTML}</div>${dualNote}
+      <div style="position:relative;width:100%;height:200px"><canvas id="${s.key}"></canvas></div>
+    </div>`;
+  }).join("");
+}
 
-  function buildLineData(src, names, fields) {
-    return slicedDates.map(d => {
-      const obj = { date: d.slice(5) };
-      names.forEach(name => {
-        fields.forEach(f => {
-          const key = fields.length > 1 ? `${shortName(name)}_${f}` : shortName(name);
-          obj[key] = src.filter(r => r.date===d && r.name===name).reduce((s,r)=>s+r[f],0);
-        });
-      });
-      return obj;
+function drawTrendCharts(sliced){
+  if(sliced.length<2)return;
+  const labels=sliced.map(d=>d.slice(5));
+
+  function singleChart(id,role,field,dashed=false){
+    const src=allData.filter(r=>r.role===role);
+    const names=rankNames(src);
+    const datasets=names.map((name,i)=>({label:shortName(name),data:sliced.map(d=>src.filter(r=>r.date===d&&r.name===name).reduce((s,r)=>s+r[field],0)),borderColor:PC[i%PC.length],backgroundColor:"transparent",tension:.3,pointRadius:3,borderWidth:2,borderDash:dashed?[4,3]:[]}));
+    makeLineChart(id,labels,datasets);
+  }
+  function dualChart(id,role){
+    const src=allData.filter(r=>r.role===role);
+    const names=rankNames(src);
+    const datasets=[];
+    names.forEach((name,i)=>{
+      datasets.push({label:`${shortName(name)} ใบสั่งยา`,data:sliced.map(d=>src.filter(r=>r.date===d&&r.name===name).reduce((s,r)=>s+r.rx,0)),borderColor:PC[i%PC.length],backgroundColor:"transparent",tension:.3,pointRadius:3,borderWidth:2});
+      datasets.push({label:`${shortName(name)} รายการยา`,data:sliced.map(d=>src.filter(r=>r.date===d&&r.name===name).reduce((s,r)=>s+r.items,0)),borderColor:PC[i%PC.length],backgroundColor:"transparent",tension:.3,pointRadius:2,borderWidth:1.5,borderDash:[5,3]});
     });
+    makeLineChart(id,labels,datasets);
   }
 
-  const cards = [];
-
-  // Precheckin — ใบสั่งยา
-  const pcSrc = allData.filter(r => r.role==="precheckin");
-  if (pcSrc.length) {
-    const names = rankNames(pcSrc);
-    const data = buildLineData(pcSrc, names, ["rx"]);
-    cards.push(
-      <SectionCard key="pc" title="Precheckin — ใบสั่งยารายวัน" roleKey="precheckin">
-        <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginBottom:10 }}>
-          {names.map((n,i) => <span key={n} style={{ display:"flex", alignItems:"center", gap:4, fontSize:11, color:"#666" }}><span style={{ width:16, height:3, background:PERSON_COLORS[i%PERSON_COLORS.length], borderRadius:2, display:"inline-block" }} />{shortName(n)}</span>)}
-        </div>
-        <ResponsiveContainer width="100%" height={200}>
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis dataKey="date" tick={{ fontSize:11 }} />
-            <YAxis tick={{ fontSize:11 }} />
-            <Tooltip content={<CustomTooltip />} />
-            {names.map((n,i) => <Line key={n} type="monotone" dataKey={shortName(n)} stroke={PERSON_COLORS[i%PERSON_COLORS.length]} strokeWidth={2} dot={{ r:3 }} />)}
-          </LineChart>
-        </ResponsiveContainer>
-      </SectionCard>
-    );
-  }
-
-  // เช็คยา — ใบสั่งยา (ทึบ) + รายการยา (ประ)
-  const ckSrc = allData.filter(r => r.role==="เช็คยา");
-  if (ckSrc.length) {
-    const names = rankNames(ckSrc);
-    const data = buildLineData(ckSrc, names, ["rx","items"]);
-    cards.push(
-      <SectionCard key="ck" title="เช็คยา — ใบสั่งยา & รายการยา รายวัน" roleKey="เช็คยา">
-        <div style={{ marginBottom:10 }}>
-          <div style={{ fontSize:10, color:"#aaa", marginBottom:4 }}>บุคลากร</div>
-          <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginBottom:6 }}>
-            {names.map((n,i) => <span key={n} style={{ display:"flex", alignItems:"center", gap:4, fontSize:11, color:"#666" }}><span style={{ width:16, height:3, background:PERSON_COLORS[i%PERSON_COLORS.length], borderRadius:2, display:"inline-block" }} />{shortName(n)}</span>)}
-          </div>
-          <div style={{ display:"flex", gap:12 }}>
-            <span style={{ display:"flex", alignItems:"center", gap:4, fontSize:11, color:"#666" }}><span style={{ width:16, height:2, background:"#888", borderRadius:2, display:"inline-block" }} />เส้นทึบ = ใบสั่งยา</span>
-            <span style={{ display:"flex", alignItems:"center", gap:4, fontSize:11, color:"#666" }}><span style={{ width:16, height:0, borderTop:"2px dashed #888", display:"inline-block" }} />เส้นประ = รายการยา</span>
-          </div>
-        </div>
-        <ResponsiveContainer width="100%" height={220}>
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis dataKey="date" tick={{ fontSize:11 }} />
-            <YAxis tick={{ fontSize:11 }} />
-            <Tooltip content={<CustomTooltip />} />
-            {names.map((n,i) => [
-              <Line key={n+"_rx"} type="monotone" dataKey={`${shortName(n)}_rx`} name={`${shortName(n)} ใบสั่งยา`} stroke={PERSON_COLORS[i%PERSON_COLORS.length]} strokeWidth={2} dot={{ r:3 }} />,
-              <Line key={n+"_items"} type="monotone" dataKey={`${shortName(n)}_items`} name={`${shortName(n)} รายการยา`} stroke={PERSON_COLORS[i%PERSON_COLORS.length]} strokeWidth={1.5} strokeDasharray="5 3" dot={{ r:2 }} />,
-            ])}
-          </LineChart>
-        </ResponsiveContainer>
-      </SectionCard>
-    );
-  }
-
-  // จ่ายยา — ใบสั่งยา (ทึบ) + รายการยา (ประ)
-  const dsSrc = allData.filter(r => r.role==="จ่ายยา");
-  if (dsSrc.length) {
-    const names = rankNames(dsSrc);
-    const data = buildLineData(dsSrc, names, ["rx","items"]);
-    cards.push(
-      <SectionCard key="ds" title="จ่ายยา — ใบสั่งยา & รายการยา รายวัน" roleKey="จ่ายยา">
-        <div style={{ marginBottom:10 }}>
-          <div style={{ fontSize:10, color:"#aaa", marginBottom:4 }}>บุคลากร</div>
-          <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginBottom:6 }}>
-            {names.map((n,i) => <span key={n} style={{ display:"flex", alignItems:"center", gap:4, fontSize:11, color:"#666" }}><span style={{ width:16, height:3, background:PERSON_COLORS[i%PERSON_COLORS.length], borderRadius:2, display:"inline-block" }} />{shortName(n)}</span>)}
-          </div>
-          <div style={{ display:"flex", gap:12 }}>
-            <span style={{ display:"flex", alignItems:"center", gap:4, fontSize:11, color:"#666" }}><span style={{ width:16, height:2, background:"#888", borderRadius:2, display:"inline-block" }} />เส้นทึบ = ใบสั่งยา</span>
-            <span style={{ display:"flex", alignItems:"center", gap:4, fontSize:11, color:"#666" }}><span style={{ width:16, height:0, borderTop:"2px dashed #888", display:"inline-block" }} />เส้นประ = รายการยา</span>
-          </div>
-        </div>
-        <ResponsiveContainer width="100%" height={220}>
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis dataKey="date" tick={{ fontSize:11 }} />
-            <YAxis tick={{ fontSize:11 }} />
-            <Tooltip content={<CustomTooltip />} />
-            {names.map((n,i) => [
-              <Line key={n+"_rx"} type="monotone" dataKey={`${shortName(n)}_rx`} name={`${shortName(n)} ใบสั่งยา`} stroke={PERSON_COLORS[i%PERSON_COLORS.length]} strokeWidth={2} dot={{ r:3 }} />,
-              <Line key={n+"_items"} type="monotone" dataKey={`${shortName(n)}_items`} name={`${shortName(n)} รายการยา`} stroke={PERSON_COLORS[i%PERSON_COLORS.length]} strokeWidth={1.5} strokeDasharray="5 3" dot={{ r:2 }} />,
-            ])}
-          </LineChart>
-        </ResponsiveContainer>
-      </SectionCard>
-    );
-  }
-
-  // จัดยา — รายการยา
-  const jdSrc = allData.filter(r => r.role==="จัดยา");
-  if (jdSrc.length) {
-    const names = rankNames(jdSrc);
-
-    // รายการยา
-    const dataItems = buildLineData(jdSrc, names, ["items"]);
-    cards.push(
-      <SectionCard key="jd_items" title="จัดยา — รายการยารายวัน" roleKey="จัดยา">
-        <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginBottom:10 }}>
-          {names.map((n,i) => <span key={n} style={{ display:"flex", alignItems:"center", gap:4, fontSize:11, color:"#666" }}><span style={{ width:16, height:3, background:PERSON_COLORS[i%PERSON_COLORS.length], borderRadius:2, display:"inline-block" }} />{shortName(n)}</span>)}
-        </div>
-        <ResponsiveContainer width="100%" height={220}>
-          <LineChart data={dataItems}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis dataKey="date" tick={{ fontSize:11 }} />
-            <YAxis tick={{ fontSize:11 }} />
-            <Tooltip content={<CustomTooltip />} />
-            {names.map((n,i) => <Line key={n} type="monotone" dataKey={shortName(n)} name={shortName(n)} stroke={PERSON_COLORS[i%PERSON_COLORS.length]} strokeWidth={2} dot={{ r:3 }} />)}
-          </LineChart>
-        </ResponsiveContainer>
-      </SectionCard>
-    );
-
-    // รายการจัดผิด
-    const dataErr = buildLineData(jdSrc, names, ["errors"]);
-    cards.push(
-      <SectionCard key="jd_err" title="จัดยา — รายการจัดผิดรายวัน">
-        <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:10 }}>
-          <span style={{ width:10, height:10, borderRadius:"50%", background:"#C0392B", display:"inline-block" }} />
-          <span style={{ fontSize:13, fontWeight:600, color:"#1a1a2e" }}></span>
-        </div>
-        <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginBottom:10 }}>
-          {names.map((n,i) => <span key={n} style={{ display:"flex", alignItems:"center", gap:4, fontSize:11, color:"#666" }}><span style={{ width:16, height:3, background:PERSON_COLORS[i%PERSON_COLORS.length], borderRadius:2, display:"inline-block" }} />{shortName(n)}</span>)}
-        </div>
-        <ResponsiveContainer width="100%" height={180}>
-          <LineChart data={dataErr}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis dataKey="date" tick={{ fontSize:11 }} />
-            <YAxis tick={{ fontSize:11 }} allowDecimals={false} />
-            <Tooltip content={<CustomTooltip />} />
-            {names.map((n,i) => <Line key={n} type="monotone" dataKey={shortName(n)} name={shortName(n)} stroke={PERSON_COLORS[i%PERSON_COLORS.length]} strokeWidth={2} strokeDasharray="4 3" dot={{ r:3 }} />)}
-          </LineChart>
-        </ResponsiveContainer>
-      </SectionCard>
-    );
-  }
-
-  return <div>{cards}</div>;
+  if(allData.some(r=>r.role==="precheckin"))singleChart("trend_pc","precheckin","rx");
+  if(allData.some(r=>r.role==="เช็คยา"))dualChart("trend_ck","เช็คยา");
+  if(allData.some(r=>r.role==="จ่ายยา"))dualChart("trend_ds","จ่ายยา");
+  if(allData.some(r=>r.role==="จัดยา")){singleChart("trend_jd_items","จัดยา","items");singleChart("trend_jd_err","จัดยา","errors",true);}
 }
 
-// ─── Person Tab ───────────────────────────────────────────────────────────────
-function PersonTab({ filtered, allData, slicedDates, metric, onMetricChange, role, onRoleChange }) {
-  const byName = aggByName(filtered).sort((a,b) => b[metric]-a[metric]);
-  const showDelta = slicedDates.length >= 2;
-  return (
-    <div>
-      <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap", marginBottom:14 }}>
-        <span style={{ fontSize:12, color:"#888" }}>Role:</span>
-        <select value={role} onChange={e => onRoleChange(e.target.value)}
-          style={{ fontSize:13, padding:"5px 10px", borderRadius:8, border:"0.5px solid #D0D0D8", background:"#fff" }}>
-          <option value="all">ทุก Role</option>
-          {ROLES.map(r => <option key={r} value={r}>{R[r].label}</option>)}
-        </select>
-        <span style={{ fontSize:12, color:"#888" }}>แสดง:</span>
-        <select value={metric} onChange={e => onMetricChange(e.target.value)}
-          style={{ fontSize:13, padding:"5px 10px", borderRadius:8, border:"0.5px solid #D0D0D8", background:"#fff" }}>
-          <option value="items">รายการยา</option>
-          <option value="rx">ใบสั่งยา</option>
-        </select>
-      </div>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(230px,1fr))", gap:12 }}>
-        {byName.map(p => {
-          const rc = R[p.role] || { fill:"#eee", text:"#666" };
-          let delta = null;
-          if (showDelta) {
-            const d1=slicedDates[slicedDates.length-2], d2=slicedDates[slicedDates.length-1];
-            const v1=allData.filter(r=>r.date===d1&&r.name===p.name).reduce((s,r)=>s+r[metric],0);
-            const v2=allData.filter(r=>r.date===d2&&r.name===p.name).reduce((s,r)=>s+r[metric],0);
-            if (v1>0) { const diff=v2-v1; delta={ diff, up:diff>0 }; }
-          }
-          return (
-            <div key={p.name} style={{ background:"#fff", border:"0.5px solid #E8E8EC", borderRadius:12, padding:"1rem 1.25rem" }}>
-              <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
-                <div style={{ width:36, height:36, borderRadius:"50%", background:rc.fill, color:rc.text, display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, fontWeight:700, flexShrink:0 }}>{initials(p.name)}</div>
-                <div>
-                  <div style={{ fontSize:13, fontWeight:600, color:"#1a1a2e" }}>{p.name}</div>
-                  <RolePill role={p.role} />
-                </div>
-              </div>
-              <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-                {p.items>0 && <div style={{ flex:1, minWidth:70, background:"#F7F8FA", borderRadius:8, padding:8 }}>
-                  <div style={{ fontSize:10, color:"#aaa" }}>รายการยา</div>
-                  <div style={{ fontSize:18, fontWeight:700, color:"#1a1a2e" }}>{p.items.toLocaleString()}
-                    {delta && <span style={{ fontSize:11, marginLeft:4, color:delta.up?"#4A8C2A":"#C0392B" }}>{delta.up?"▲":"▼"}{Math.abs(delta.diff).toLocaleString()}</span>}
-                  </div>
-                </div>}
-                {p.rx>0 && <div style={{ flex:1, minWidth:70, background:"#F7F8FA", borderRadius:8, padding:8 }}>
-                  <div style={{ fontSize:10, color:"#aaa" }}>ใบสั่งยา</div>
-                  <div style={{ fontSize:18, fontWeight:700, color:"#1a1a2e" }}>{p.rx.toLocaleString()}</div>
-                </div>}
-                {p.errors>0 && <div style={{ flex:1, minWidth:70, background:"#FFF0F0", borderRadius:8, padding:8 }}>
-                  <div style={{ fontSize:10, color:"#C0392B" }}>จัดผิด</div>
-                  <div style={{ fontSize:18, fontWeight:700, color:"#C0392B" }}>{p.errors}</div>
-                </div>}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-// ─── Main App ─────────────────────────────────────────────────────────────────
-export default function App() {
-  const [allData, setAllData] = useState([]);
-  const [loadedFiles, setLoadedFiles] = useState({});
-  const [slicerStart, setSlicerStart] = useState(null);
-  const [slicerEnd, setSlicerEnd] = useState(null);
-  const [tab, setTab] = useState("overview");
-  const [metricOv, setMetricOv] = useState("items");
-  const [metricP, setMetricP] = useState("items");
-  const [roleP, setRoleP] = useState("all");
-  const [uploading, setUploading] = useState(false);
-  const fileRef = useRef();
-
-  const allDates = [...new Set(allData.map(d => d.date))].sort();
-
-  const slicedDates = !slicerStart ? allDates
-    : !slicerEnd ? allDates.filter(d => d === slicerStart)
-    : allDates.filter(d => d >= slicerStart && d <= slicerEnd);
-
-  const getFiltered = useCallback(() => {
-    let d = allData.filter(r => slicedDates.includes(r.date));
-    if (tab === "person" && roleP !== "all") d = d.filter(r => r.role === roleP);
-    return d;
-  }, [allData, slicedDates, tab, roleP]);
-
-  const filtered = getFiltered();
-  const totalItems = filtered.reduce((s,r) => s+r.items, 0);
-  const totalRx    = filtered.reduce((s,r) => s+r.rx, 0);
-  const totalErr   = filtered.reduce((s,r) => s+r.errors, 0);
-  const totalNames = new Set(filtered.map(r=>r.name)).size;
-
-  async function handleFiles(files) {
-    setUploading(true);
-    let newData = [...allData];
-    const newFiles = { ...loadedFiles };
-    for (const file of Array.from(files)) {
-      const date = dateFromFilename(file.name) || prompt(`ไม่พบวันที่ในชื่อไฟล์ "${file.name}"\nพิมพ์วันที่ (YYYY-MM-DD):`);
-      if (!date) continue;
-      const rows = await new Promise((res,rej) => {
-        const r = new FileReader();
-        r.onload = e => { try { const wb=XLSX.read(e.target.result,{type:"array"}); const ws=wb.Sheets[wb.SheetNames[0]]; res(XLSX.utils.sheet_to_json(ws,{header:1,defval:null})); } catch(e){rej(e)} };
-        r.onerror = rej; r.readAsArrayBuffer(file);
-      });
-      const parsed = parseRows(rows, date);
-      if (!parsed.length) continue;
-      newFiles[file.name] = date;
-      newData = newData.filter(d => d.date !== date);
-      newData.push(...parsed);
+function renderPersonHTML(filtered,metric,sliced){
+  const byName=aggByName(filtered).sort((a,b)=>b[metric]-a[metric]);
+  const sel=`<div class="filter-bar">
+    <label>Role:</label>
+    <select id="roleP"><option value="all">ทุก Role</option>${ROLES.map(r=>`<option value="${r}"${roleP===r?" selected":""}>${R[r].label}</option>`).join("")}</select>
+    <label>แสดง:</label>
+    <select id="metricP"><option value="items"${metric==="items"?" selected":""}>รายการยา</option><option value="rx"${metric==="rx"?" selected":""}>ใบสั่งยา</option></select>
+  </div>`;
+  const cards=byName.map(p=>{
+    const rc=R[p.role]||{fill:"#eee",text:"#666"};
+    let delta="";
+    if(sliced.length>=2){
+      const d1=sliced[sliced.length-2],d2=sliced[sliced.length-1];
+      const v1=allData.filter(r=>r.date===d1&&r.name===p.name).reduce((s,r)=>s+r[metric],0);
+      const v2=allData.filter(r=>r.date===d2&&r.name===p.name).reduce((s,r)=>s+r[metric],0);
+      if(v1>0){const diff=v2-v1;delta=`<span class="${diff>0?"delta-up":"delta-down"}">${diff>0?"▲":"▼"}${Math.abs(diff).toLocaleString()}</span>`;}
     }
-    setAllData(newData);
-    setLoadedFiles(newFiles);
-    setUploading(false);
-  }
-
-  function removeFile(name, date) {
-    setLoadedFiles(f => { const c={...f}; delete c[name]; return c; });
-    setAllData(d => d.filter(r => r.date !== date));
-  }
-
-  function chipClick(date) {
-    if (!slicerStart || slicerEnd) { setSlicerStart(date); setSlicerEnd(null); }
-    else { if (date < slicerStart) { setSlicerEnd(slicerStart); setSlicerStart(date); } else setSlicerEnd(date); }
-  }
-
-  const dateRangeLabel = allDates.length === 0 ? "ยังไม่มีข้อมูล — อัปโหลดไฟล์ Excel เพื่อเริ่มใช้งาน"
-    : allDates.length === 1 ? allDates[0]
-    : `${allDates[0]} ถึง ${allDates[allDates.length-1]} (${allDates.length} วัน)`;
-
-  const TAB_STYLE = active => ({
-    padding:"7px 18px", fontSize:13, border:"none", background:"none", cursor:"pointer",
-    color: active ? "#1a1a2e" : "#999",
-    borderBottom: active ? "2px solid #1a1a2e" : "2px solid transparent",
-    fontWeight: active ? 600 : 400, marginBottom:-1, borderRadius:0,
-  });
-
-  return (
-    <div style={{ fontFamily:"'Sarabun', 'IBM Plex Sans Thai', sans-serif", maxWidth:820, margin:"0 auto", padding:"1.25rem 1rem", color:"#1a1a2e" }}>
-
-      {/* Header */}
-      <div style={{ marginBottom:"1rem" }}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:10 }}>
-          <div>
-            <h1 style={{ fontSize:18, fontWeight:700, color:"#1a1a2e", margin:0, lineHeight:1.3 }}>Workload Dashboard ห้องยาลีลาวดี</h1>
-            <div style={{ fontSize:12, color:"#B07010", fontWeight:600, marginTop:3 }}>เฉพาะในเวลาทำการ</div>
-            <div style={{ fontSize:12, color:"#aaa", marginTop:2 }}>{dateRangeLabel}</div>
-          </div>
-          <label style={{ border:"0.5px dashed #C0C0CC", borderRadius:10, padding:"8px 14px", cursor:"pointer", display:"flex", alignItems:"center", gap:8, background:"#FAFAFA", transition:"background .15s" }}
-            onMouseOver={e=>e.currentTarget.style.background="#F0F1F5"} onMouseOut={e=>e.currentTarget.style.background="#FAFAFA"}>
-            <span style={{ fontSize:18 }}>📂</span>
-            <div>
-              <div style={{ fontSize:13, color:"#555" }}>{uploading ? "กำลังโหลด…" : "อัปโหลด Excel (หลายไฟล์ได้)"}</div>
-              <div style={{ fontSize:11, color:"#aaa" }}>ชื่อไฟล์ต้องมีวันที่ เช่น workload_2026-05-19.xlsx</div>
-            </div>
-            <input ref={fileRef} type="file" accept=".xlsx,.xls" multiple style={{ display:"none" }} onChange={e => handleFiles(e.target.files)} />
-          </label>
-        </div>
-
-
+    return`<div class="person-card">
+      <div class="person-header">
+        <div class="avatar" style="background:${rc.fill};color:${rc.text}">${initials(p.name)}</div>
+        <div><div style="font-size:13px;font-weight:600">${p.name}</div><span class="role-pill" style="background:${rc.fill};color:${rc.text}">${R[p.role]?.label||p.role}</span></div>
       </div>
-
-      {/* Date Slicer */}
-      {allDates.length > 0 && (
-        <DateSlicer dates={allDates} slicerStart={slicerStart} slicerEnd={slicerEnd} onChipClick={chipClick} onReset={() => { setSlicerStart(null); setSlicerEnd(null); }} />
-      )}
-
-      {/* KPI */}
-      <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginBottom:14 }}>
-        <KPICard label="บุคลากร" value={totalNames} sub="คน" />
-        <KPICard label="จำนวนวัน" value={slicedDates.length || "—"} sub="วัน" />
-        <KPICard label="รายการยารวม" value={totalItems.toLocaleString()} sub="รายการ" />
-        <KPICard label="ใบสั่งยารวม" value={totalRx.toLocaleString()} sub="ใบ" />
-        <KPICard label="จัดผิด" value={totalErr} sub="รายการ" danger={totalErr > 0} />
+      <div class="stat-row">
+        ${p.items>0?`<div class="stat-box"><div class="stat-lbl">รายการยา</div><div class="stat-val">${p.items.toLocaleString()}${delta}</div></div>`:""}
+        ${p.rx>0?`<div class="stat-box"><div class="stat-lbl">ใบสั่งยา</div><div class="stat-val">${p.rx.toLocaleString()}</div></div>`:""}
+        ${p.errors>0?`<div class="stat-box err"><div class="stat-lbl">จัดผิด</div><div class="stat-val">${p.errors}</div></div>`:""}
       </div>
-
-      {/* Tabs */}
-      <div style={{ borderBottom:"0.5px solid #E8E8EC", display:"flex", marginBottom:16 }}>
-        <button style={TAB_STYLE(tab==="overview")} onClick={() => setTab("overview")}>ภาพรวม</button>
-        <button style={TAB_STYLE(tab==="trend")} onClick={() => setTab("trend")}>แนวโน้มรายวัน</button>
-        <button style={TAB_STYLE(tab==="person")} onClick={() => setTab("person")}>รายบุคคล</button>
-      </div>
-
-      {/* Empty state */}
-      {allData.length === 0 && (
-        <div style={{ textAlign:"center", padding:"4rem 2rem", color:"#aaa" }}>
-          <div style={{ fontSize:40, marginBottom:12 }}>📊</div>
-          <div style={{ fontSize:15, fontWeight:600, color:"#999", marginBottom:6 }}>ยังไม่มีข้อมูล</div>
-          <div style={{ fontSize:13 }}>อัปโหลดไฟล์ Excel รายวันเพื่อเริ่มใช้งาน</div>
-        </div>
-      )}
-
-      {/* Tab content */}
-      {allData.length > 0 && tab === "overview" && (
-        <OverviewTab filtered={filtered} metric={metricOv} onMetricChange={setMetricOv} />
-      )}
-      {allData.length > 0 && tab === "trend" && (
-        <TrendTab slicedDates={slicedDates} allData={allData} />
-      )}
-      {allData.length > 0 && tab === "person" && (
-        <PersonTab filtered={filtered} allData={allData} slicedDates={slicedDates} metric={metricP} onMetricChange={setMetricP} role={roleP} onRoleChange={setRoleP} />
-      )}
-
-    </div>
-  );
+    </div>`;
+  }).join("");
+  return sel+`<div class="person-grid">${cards}</div>`;
 }
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(React.createElement(App));
-  </script>
+// init
+render();
+</script>
 </body>
 </html>
