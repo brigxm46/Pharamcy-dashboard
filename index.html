@@ -14,8 +14,12 @@
     h1{font-size:18px;font-weight:700}
     .subtitle{font-size:12px;color:#B07010;font-weight:600;margin-top:2px}
     .datelabel{font-size:12px;color:#aaa;margin-top:2px}
+    .load-btn{border:0.5px solid #2E7BC4;border-radius:10px;padding:8px 16px;cursor:pointer;display:flex;align-items:center;gap:8px;background:#fff;font-size:13px;color:#2E7BC4;font-weight:600;transition:background .15s}
+    .load-btn:hover{background:#DDEEFF}
+    .load-btn:disabled{opacity:.5;cursor:not-allowed}
     .upload-label{border:0.5px dashed #ccc;border-radius:10px;padding:8px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;background:#fafafa;font-size:13px;color:#555;transition:background .15s}
     .upload-label:hover{background:#f0f1f5}
+    .btn-row{display:flex;gap:8px;flex-wrap:wrap}
     .slicer{background:#f7f8fa;border:0.5px solid #e8e8ec;border-radius:12px;padding:10px 14px;margin-bottom:1rem;display:flex;align-items:center;flex-wrap:wrap;gap:10px}
     .slicer-label{font-size:12px;color:#888;font-weight:600;white-space:nowrap}
     .chips{display:flex;flex-wrap:wrap;gap:5px;flex:1}
@@ -24,7 +28,6 @@
     .chip.inrange{background:#ddeeff;border-color:#2E7BC4;color:#1A4F82}
     .slicer-info{font-size:11px;color:#888;white-space:nowrap}
     .reset-btn{font-size:12px;color:#888;padding:4px 8px;border-radius:8px;border:0.5px solid #d0d0d8;background:transparent;cursor:pointer}
-    .reset-btn:hover{background:#f0f1f5}
     .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:1.25rem}
     .kpi{background:#f7f8fa;border-radius:10px;padding:12px 16px}
     .kpi-lbl{font-size:11px;color:#888;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
@@ -66,15 +69,25 @@
     select{font-size:13px;padding:5px 10px;border-radius:8px;border:0.5px solid #d0d0d8;background:#fff;color:#1a1a2e}
     .filter-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
     .filter-bar label{font-size:12px;color:#888}
-    canvas{display:block}
     .no-data{text-align:center;padding:2rem;color:#aaa;font-size:13px}
+    .loading{text-align:center;padding:3rem;color:#888;font-size:14px}
+    .progress{font-size:12px;color:#aaa;margin-top:6px}
+    .toast{position:fixed;bottom:20px;right:20px;background:#1a1a2e;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
+    .toast.show{opacity:1}
   </style>
 </head>
 <body>
 <div id="app"></div>
+<div class="toast" id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
 // ── Config ─────────────────────────────────────────────────────────────────
+const GITHUB_USER = "brigxm46";
+const GITHUB_REPO = "pharmacy-dashboard";
+const DATA_FOLDER = "data";
+const RAW_BASE = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/${DATA_FOLDER}`;
+const API_BASE = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${DATA_FOLDER}`;
+
 const R = {
   precheckin:{hex:"#2E7BC4",fill:"#DDEEFF",text:"#1A4F82",label:"Precheckin"},
   จัดยา:{hex:"#4A8C2A",fill:"#DFF0D1",text:"#2C5518",label:"จัดยา"},
@@ -84,16 +97,23 @@ const R = {
 const ROLES=["precheckin","จัดยา","เช็คยา","จ่ายยา"];
 const PC=["#2E7BC4","#B07010","#534AB7","#0F6E56","#C0392B","#2D6A8E","#4A8C2A","#8E5A2D"];
 
-// ── Helpers ────────────────────────────────────────────────────────────────
+// ── Helpers ─────────────────────────────────────────────────────────────────
 const shortName=n=>n.replace(/^(นางสาว|นาย|นาง)/,"").split(" ")[0];
 const initials=n=>n.replace(/^(นางสาว|นาย|นาง)/,"").slice(0,2);
 const toN=v=>{const x=Number(v);return isNaN(x)?0:x};
+
+function showToast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),3000);
+}
 
 function dateFromFilename(name){
   const m=name.match(/(\d{4}-\d{2}-\d{2})/);if(m)return m[1];
   const m2=name.match(/(\d{2})[_\-](\d{2})[_\-](\d{4})/);if(m2)return`${m2[3]}-${m2[2]}-${m2[1]}`;
   return null;
 }
+
 function parseRows(rows,date){
   let sub=-1;
   for(let i=0;i<Math.min(10,rows.length);i++){if(rows[i]?.some?.(c=>c&&String(c).includes("ชื่อ"))){sub=i+1;break}}
@@ -111,6 +131,14 @@ function parseRows(rows,date){
   }
   return out;
 }
+
+async function parseXlsx(buf,date){
+  const wb=XLSX.read(buf,{type:"array"});
+  const ws=wb.Sheets[wb.SheetNames[0]];
+  const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
+  return parseRows(rows,date);
+}
+
 function aggByName(rows){
   const m={};
   rows.forEach(r=>{if(!m[r.name])m[r.name]={name:r.name,role:r.role,rx:0,items:0,errors:0};m[r.name].rx+=r.rx;m[r.name].items+=r.items;m[r.name].errors+=r.errors;});
@@ -120,7 +148,36 @@ function rankNames(src){
   return[...new Set(src.map(r=>r.name))].map(n=>({n,t:src.filter(r=>r.name===n).reduce((s,r)=>s+r.items+r.rx,0)})).sort((a,b)=>b.t-a.t).map(x=>x.n);
 }
 
-// ── State ──────────────────────────────────────────────────────────────────
+// ── Load from GitHub ─────────────────────────────────────────────────────────
+async function loadFromGitHub(){
+  document.getElementById("app").innerHTML=`<div class="loading">⏳ กำลังโหลดข้อมูลจาก GitHub...<div class="progress" id="prog"></div></div>`;
+  try{
+    const res=await fetch(API_BASE);
+    if(!res.ok)throw new Error(`GitHub API error: ${res.status}`);
+    const files=await res.json();
+    const xlsxFiles=files.filter(f=>f.name.match(/\.xlsx?$/i));
+    if(!xlsxFiles.length){showToast("ไม่พบไฟล์ Excel ในโฟลเดอร์ data/");render();return;}
+
+    let loaded=0;
+    allData=[];
+    for(const file of xlsxFiles){
+      document.getElementById("prog").textContent=`โหลด ${++loaded}/${xlsxFiles.length}: ${file.name}`;
+      const date=dateFromFilename(file.name);
+      if(!date)continue;
+      const r=await fetch(file.download_url);
+      const buf=await r.arrayBuffer();
+      const parsed=await parseXlsx(new Uint8Array(buf),date);
+      allData.push(...parsed);
+    }
+    slicerStart=null;slicerEnd=null;
+    showToast(`✓ โหลดสำเร็จ ${xlsxFiles.length} ไฟล์`);
+    render();
+  }catch(e){
+    document.getElementById("app").innerHTML=`<div class="loading">❌ โหลดไม่สำเร็จ: ${e.message}<br><br><button onclick="render()" style="padding:8px 16px;border-radius:8px;border:1px solid #ccc;cursor:pointer">กลับหน้าหลัก</button></div>`;
+  }
+}
+
+// ── State ────────────────────────────────────────────────────────────────────
 let allData=[], slicerStart=null, slicerEnd=null, currentTab="overview", metricOv="items", metricP="items", roleP="all";
 const charts={};
 
@@ -139,27 +196,26 @@ function getFiltered(){
 }
 function getMetric(){return currentTab==="overview"?metricOv:metricP}
 
-// ── File Upload ─────────────────────────────────────────────────────────────
+// ── Events ────────────────────────────────────────────────────────────────────
 document.getElementById("app").addEventListener("change",async e=>{
-  if(e.target.id!=="fileInput")return;
-  for(const file of e.target.files){
-    const date=dateFromFilename(file.name)||prompt(`ไม่พบวันที่ในชื่อไฟล์ "${file.name}"\nพิมพ์วันที่ (YYYY-MM-DD):`);
-    if(!date)continue;
-    const buf=await file.arrayBuffer();
-    const wb=XLSX.read(buf,{type:"array"});
-    const ws=wb.Sheets[wb.SheetNames[0]];
-    const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
-    const parsed=parseRows(rows,date);
-    if(!parsed.length)continue;
-    allData=allData.filter(d=>d.date!==date);
-    allData.push(...parsed);
+  if(e.target.id==="fileInput"){
+    for(const file of e.target.files){
+      const date=dateFromFilename(file.name)||prompt(`ไม่พบวันที่ใน "${file.name}"\nพิมพ์วันที่ (YYYY-MM-DD):`);
+      if(!date)continue;
+      const buf=await file.arrayBuffer();
+      const parsed=await parseXlsx(new Uint8Array(buf),date);
+      if(!parsed.length)continue;
+      allData=allData.filter(d=>d.date!==date);
+      allData.push(...parsed);
+    }
+    slicerStart=null;slicerEnd=null;showToast("✓ อัปโหลดสำเร็จ");render();
   }
-  slicerStart=null;slicerEnd=null;
-  render();
+  if(e.target.id==="metricOv"){metricOv=e.target.value;render();}
+  if(e.target.id==="metricP"){metricP=e.target.value;render();}
+  if(e.target.id==="roleP"){roleP=e.target.value;render();}
 });
-
-// ── Slicer ─────────────────────────────────────────────────────────────────
 document.getElementById("app").addEventListener("click",e=>{
+  if(e.target.id==="btnLoadGH")loadFromGitHub();
   if(e.target.classList.contains("chip")){
     const date=e.target.dataset.date;
     if(!slicerStart||slicerEnd){slicerStart=date;slicerEnd=null;}
@@ -169,21 +225,16 @@ document.getElementById("app").addEventListener("click",e=>{
   if(e.target.id==="resetSlicer"){slicerStart=null;slicerEnd=null;render();}
   if(e.target.classList.contains("tab")){currentTab=e.target.dataset.tab;render();}
 });
-document.getElementById("app").addEventListener("change",e=>{
-  if(e.target.id==="metricOv"){metricOv=e.target.value;render();}
-  if(e.target.id==="metricP"){metricP=e.target.value;render();}
-  if(e.target.id==="roleP"){roleP=e.target.value;render();}
-});
 
-// ── Chart helpers ───────────────────────────────────────────────────────────
+// ── Charts ────────────────────────────────────────────────────────────────────
 function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
-function makeLineChart(id,labels,datasets,opts={}){
+function makeLineChart(id,labels,datasets){
   destroyChart(id);
   const ctx=document.getElementById(id);if(!ctx)return;
-  charts[id]=new Chart(ctx,{type:"line",data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:11}}},y:{ticks:{font:{size:11}},beginAtZero:true}},...opts}});
+  charts[id]=new Chart(ctx,{type:"line",data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:11}}},y:{ticks:{font:{size:11}},beginAtZero:true}}}});
 }
 
-// ── Render ──────────────────────────────────────────────────────────────────
+// ── Render ────────────────────────────────────────────────────────────────────
 function render(){
   const filtered=getFiltered();
   const dates=getAllDates();
@@ -194,13 +245,10 @@ function render(){
   const totalRx=filtered.reduce((s,r)=>s+r.rx,0);
   const totalErr=filtered.reduce((s,r)=>s+r.errors,0);
   const names=[...new Set(filtered.map(r=>r.name))].length;
-
-  const dateRangeLabel=dates.length===0?"ยังไม่มีข้อมูล — อัปโหลดไฟล์ Excel เพื่อเริ่มใช้งาน":dates.length===1?dates[0]:`${dates[0]} ถึง ${dates[dates.length-1]} (${dates.length} วัน)`;
+  const dateRangeLabel=dates.length===0?"ยังไม่มีข้อมูล":dates.length===1?dates[0]:`${dates[0]} ถึง ${dates[dates.length-1]} (${dates.length} วัน)`;
   const infoText=!slicerStart?"คลิกเลือกวันเริ่มต้น":!slicerEnd?`เริ่ม ${slicerStart.slice(5)} — คลิกเลือกวันสิ้นสุด`:`${slicerStart.slice(5)} – ${slicerEnd.slice(5)}`;
-
   const chipStatus=d=>{if(!slicerStart)return"";if(!slicerEnd)return d===slicerStart?"edge":"";if(d===slicerStart||d===slicerEnd)return"edge";if(d>slicerStart&&d<slicerEnd)return"inrange";return""};
 
-  // destroy all trend charts before re-render
   ["trend_pc","trend_ck","trend_ds","trend_jd_items","trend_jd_err"].forEach(destroyChart);
 
   document.getElementById("app").innerHTML=`
@@ -210,10 +258,13 @@ function render(){
       <div class="subtitle">เฉพาะในเวลาทำการ</div>
       <div class="datelabel">${dateRangeLabel}</div>
     </div>
-    <label class="upload-label">
-      📂 <span>อัปโหลด Excel (หลายไฟล์ได้)</span>
-      <input type="file" id="fileInput" accept=".xlsx,.xls" multiple style="display:none">
-    </label>
+    <div class="btn-row">
+      <button class="load-btn" id="btnLoadGH">🔄 โหลดจาก GitHub</button>
+      <label class="upload-label">
+        📂 อัปโหลด Excel
+        <input type="file" id="fileInput" accept=".xlsx,.xls" multiple style="display:none">
+      </label>
+    </div>
   </div>
 
   ${dates.length>0?`
@@ -238,15 +289,13 @@ function render(){
     <button class="tab${currentTab==="person"?" on":""}" data-tab="person">รายบุคคล</button>
   </div>
 
-  ${allData.length===0?`<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">ยังไม่มีข้อมูล</div><div>อัปโหลดไฟล์ Excel รายวันเพื่อเริ่มใช้งาน</div></div>`:""}
-
+  ${allData.length===0?`<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">ยังไม่มีข้อมูล</div><div>กด <b>โหลดจาก GitHub</b> เพื่อดึงข้อมูลล่าสุด<br>หรืออัปโหลด Excel โดยตรง</div></div>`:""}
   ${allData.length>0&&currentTab==="overview"?renderOverview(filtered,metric):""}
   ${allData.length>0&&currentTab==="trend"?renderTrendHTML(sliced):""}
   ${allData.length>0&&currentTab==="person"?renderPersonHTML(filtered,metric,sliced):""}
   `;
 
-  // draw charts after DOM update
-  if(allData.length>0&&currentTab==="trend") drawTrendCharts(sliced);
+  if(allData.length>0&&currentTab==="trend")drawTrendCharts(sliced);
 }
 
 function renderOverview(filtered,metric){
@@ -290,24 +339,21 @@ function renderTrendHTML(sliced){
 function drawTrendCharts(sliced){
   if(sliced.length<2)return;
   const labels=sliced.map(d=>d.slice(5));
-
   function singleChart(id,role,field,dashed=false){
     const src=allData.filter(r=>r.role===role);
     const names=rankNames(src);
-    const datasets=names.map((name,i)=>({label:shortName(name),data:sliced.map(d=>src.filter(r=>r.date===d&&r.name===name).reduce((s,r)=>s+r[field],0)),borderColor:PC[i%PC.length],backgroundColor:"transparent",tension:.3,pointRadius:3,borderWidth:2,borderDash:dashed?[4,3]:[]}));
-    makeLineChart(id,labels,datasets);
+    makeLineChart(id,labels,names.map((name,i)=>({label:shortName(name),data:sliced.map(d=>src.filter(r=>r.date===d&&r.name===name).reduce((s,r)=>s+r[field],0)),borderColor:PC[i%PC.length],backgroundColor:"transparent",tension:.3,pointRadius:3,borderWidth:2,borderDash:dashed?[4,3]:[]})));
   }
   function dualChart(id,role){
     const src=allData.filter(r=>r.role===role);
     const names=rankNames(src);
-    const datasets=[];
+    const ds=[];
     names.forEach((name,i)=>{
-      datasets.push({label:`${shortName(name)} ใบสั่งยา`,data:sliced.map(d=>src.filter(r=>r.date===d&&r.name===name).reduce((s,r)=>s+r.rx,0)),borderColor:PC[i%PC.length],backgroundColor:"transparent",tension:.3,pointRadius:3,borderWidth:2});
-      datasets.push({label:`${shortName(name)} รายการยา`,data:sliced.map(d=>src.filter(r=>r.date===d&&r.name===name).reduce((s,r)=>s+r.items,0)),borderColor:PC[i%PC.length],backgroundColor:"transparent",tension:.3,pointRadius:2,borderWidth:1.5,borderDash:[5,3]});
+      ds.push({label:`${shortName(name)} ใบสั่งยา`,data:sliced.map(d=>src.filter(r=>r.date===d&&r.name===name).reduce((s,r)=>s+r.rx,0)),borderColor:PC[i%PC.length],backgroundColor:"transparent",tension:.3,pointRadius:3,borderWidth:2});
+      ds.push({label:`${shortName(name)} รายการยา`,data:sliced.map(d=>src.filter(r=>r.date===d&&r.name===name).reduce((s,r)=>s+r.items,0)),borderColor:PC[i%PC.length],backgroundColor:"transparent",tension:.3,pointRadius:2,borderWidth:1.5,borderDash:[5,3]});
     });
-    makeLineChart(id,labels,datasets);
+    makeLineChart(id,labels,ds);
   }
-
   if(allData.some(r=>r.role==="precheckin"))singleChart("trend_pc","precheckin","rx");
   if(allData.some(r=>r.role==="เช็คยา"))dualChart("trend_ck","เช็คยา");
   if(allData.some(r=>r.role==="จ่ายยา"))dualChart("trend_ds","จ่ายยา");
@@ -346,7 +392,6 @@ function renderPersonHTML(filtered,metric,sliced){
   return sel+`<div class="person-grid">${cards}</div>`;
 }
 
-// init
 render();
 </script>
 </body>
