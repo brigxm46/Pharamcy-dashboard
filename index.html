@@ -373,22 +373,19 @@ function renderPersonHTML(filtered,metric,sliced){
   </div>`;
   const cards=byName.map(p=>{
     const rc=R[p.role]||{fill:"#eee",text:"#666"};
-    let delta="";
-    if(sliced.length>=2){
-      const d1=sliced[sliced.length-2],d2=sliced[sliced.length-1];
-      const v1=allData.filter(r=>r.date===d1&&r.name===p.name).reduce((s,r)=>s+r[metric],0);
-      const v2=allData.filter(r=>r.date===d2&&r.name===p.name).reduce((s,r)=>s+r[metric],0);
-      if(v1>0){const diff=v2-v1;delta=`<span class="${diff>0?"delta-up":"delta-down"}">${diff>0?"▲":"▼"}${Math.abs(diff).toLocaleString()}</span>`;}
-    }
+    // นับจำนวนวันที่คนนั้นทำงานจริงในช่วงที่เลือก
+    const workDays=sliced.filter(d=>allData.some(r=>r.date===d&&r.name===p.name)).length||1;
+    const avgItems=p.items>0?(p.items/workDays).toFixed(1):"—";
+    const avgRx=p.rx>0?(p.rx/workDays).toFixed(1):"—";
     return`<div class="person-card">
       <div class="person-header">
         <div class="avatar" style="background:${rc.fill};color:${rc.text}">${initials(p.name)}</div>
         <div><div style="font-size:13px;font-weight:600">${p.name}</div><span class="role-pill" style="background:${rc.fill};color:${rc.text}">${R[p.role]?.label||p.role}</span></div>
       </div>
       <div class="stat-row">
-        ${p.items>0?`<div class="stat-box"><div class="stat-lbl">รายการยา</div><div class="stat-val">${p.items.toLocaleString()}${delta}</div></div>`:""}
-        ${p.rx>0?`<div class="stat-box"><div class="stat-lbl">ใบสั่งยา</div><div class="stat-val">${p.rx.toLocaleString()}</div></div>`:""}
-        ${p.errors>0?`<div class="stat-box err"><div class="stat-lbl">จัดผิด</div><div class="stat-val">${p.errors}</div></div>`:""}
+        ${p.items>0?`<div class="stat-box"><div class="stat-lbl">รายการยา</div><div class="stat-val">${p.items.toLocaleString()}</div><div style="font-size:10px;color:#aaa;margin-top:2px">เฉลี่ย ${avgItems}/วัน</div></div>`:""}
+        ${p.rx>0?`<div class="stat-box"><div class="stat-lbl">ใบสั่งยา</div><div class="stat-val">${p.rx.toLocaleString()}</div><div style="font-size:10px;color:#aaa;margin-top:2px">เฉลี่ย ${avgRx}/วัน</div></div>`:""}
+        ${p.errors>0?`<div class="stat-box err"><div class="stat-lbl">จัดผิด</div><div class="stat-val">${p.errors}</div><div style="font-size:10px;color:#C0392B;margin-top:2px;opacity:.7">${workDays} วัน</div></div>`:""}
       </div>
     </div>`;
   }).join("");
